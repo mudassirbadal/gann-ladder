@@ -144,11 +144,11 @@ export default function MobileBottomNav({
         <button
           type="button"
           onClick={onOpenMenu}
-          className="flex flex-col items-center justify-center py-1.5 px-1 rounded-2xl text-stone-700 hover:text-stone-950 hover:bg-[#f4efe2] transition-all duration-200 active:scale-90"
+          className="flex flex-col items-center justify-center py-1.5 px-1 rounded-2xl text-stone-700 hover:text-stone-950 hover:bg-[#f4efe2] transition-all duration-200 active:scale-75 active:rotate-3 group"
           aria-label="Open Navigation Menu"
         >
-          <div className="relative inline-flex items-center justify-center">
-            <Menu className="w-4 h-4 text-amber-700" />
+          <div className="relative inline-flex items-center justify-center transition-transform duration-200 group-hover:scale-110 group-active:scale-90 group-active:rotate-12">
+            <Menu className="w-4 h-4 text-amber-700 transition-transform duration-200 group-hover:scale-110" />
             {alertsCount > 0 && (
               <span
                 className="absolute -top-1.5 -right-2.5 min-w-[15px] h-[15px] px-1 rounded-full text-[8.5px] font-black font-mono flex items-center justify-center leading-none text-white bg-amber-600 shadow-xs border border-white"

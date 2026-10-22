@@ -177,11 +177,15 @@ export default function Header({
           {/* Mobile Hamburger Menu Button on Right Side */}
           <button
             onClick={onOpenMenu}
-            className="sm:hidden p-1.5 px-2 rounded-lg bg-[#262420] text-amber-400 hover:bg-stone-800 active:scale-95 transition flex items-center justify-center gap-1 shadow-xs ml-1"
+            className="sm:hidden p-2 rounded-xl bg-[#262420] text-amber-400 hover:bg-stone-800 active:scale-75 active:rotate-12 transition-all duration-200 flex items-center justify-center shadow-xs ml-1 group"
             title="Open Navigation Menu"
             aria-label="Open navigation menu"
           >
-            <Menu className="w-4 h-4" />
+            <div className="w-4 h-4 flex flex-col justify-between py-0.5 transition-transform duration-200 group-hover:scale-110 group-active:rotate-45">
+              <span className="w-full h-0.5 rounded-full bg-amber-400 transition-all duration-200 group-active:translate-y-1 group-active:rotate-45" />
+              <span className="w-full h-0.5 rounded-full bg-amber-400 transition-all duration-200 group-active:opacity-0" />
+              <span className="w-full h-0.5 rounded-full bg-amber-400 transition-all duration-200 group-active:-translate-y-1 group-active:-rotate-45" />
+            </div>
           </button>
         </div>
       </div>
