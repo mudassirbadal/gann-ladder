@@ -1,0 +1,127 @@
+import { useState } from 'react';
+import { Copy, Check } from 'lucide-react';
+import { formatPrice } from '../../utils/formatters';
+
+export default function TradeSetupCalculator({
+  lvl,
+  ticker,
+  tradeSetup,
+  accountBalance,
+  setAccountBalance,
+  riskPerTradePct,
+  setRiskPerTradePct
+}) {
+  const [copied, setCopied] = useState(false);
+
+  if (!tradeSetup) return null;
+  const baseAsset = ticker.split('/')[0];
+
+  const handleCopySetup = (e) => {
+    e.stopPropagation();
+    const text =
+      `${ticker} ${tradeSetup.direction} [${lvl.rank} · ${lvl.degree}°]\n` +
+      `Entry: $${formatPrice(tradeSetup.entry)}\n` +
+      `Stop-Loss: $${formatPrice(tradeSetup.stopLoss)} (-${tradeSetup.slDistancePct.toFixed(2)}%)\n` +
+      `TP1: $${formatPrice(tradeSetup.takeProfit1)} (+${tradeSetup.tp1DistancePct.toFixed(2)}%)\n` +
+      `TP2: $${formatPrice(tradeSetup.takeProfit2)}\n` +
+      `R:R: ${tradeSetup.rrRatio.toFixed(2)}R | Size: ${tradeSetup.positionUnits.toFixed(4)} ${baseAsset} ($${formatPrice(tradeSetup.riskDollars)} risk)`;
+
+    navigator.clipboard?.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div
+      className="px-3 sm:px-3.5 pb-3.5 pt-2.5 border-t border-[#e6decb] bg-[#f7f3e8] space-y-2.5 text-xs font-mono"
+    >
+      <div className="flex items-center justify-between">
+        <span className="font-bold text-[#8a6813] uppercase tracking-wider text-[11px]">
+          Target Setup · {tradeSetup.direction}
+        </span>
+        <button
+          onClick={handleCopySetup}
+          className="px-2.5 py-1 rounded-md bg-[#262420] text-[#fcfaf5] text-[10px] font-semibold flex items-center gap-1 hover:bg-stone-800 active:scale-95 transition"
+        >
+          {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+          <span>{copied ? 'Copied' : 'Copy Plan'}</span>
+        </button>
+      </div>
+
+      {/* Entry, Stop-Loss, Take-Profit 1 & 2 */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <div className="p-2 rounded-lg bg-white border border-[#e4dccb]">
+          <div className="text-[10px] text-stone-500 uppercase">Limit Entry</div>
+          <div className="text-[12px] font-bold text-stone-900 mt-0.5">
+            ${formatPrice(tradeSetup.entry)}
+          </div>
+        </div>
+
+        <div className="p-2 rounded-lg bg-white border border-[#e4dccb]">
+          <div className="text-[10px] text-red-600 uppercase font-semibold">Stop-Loss</div>
+          <div className="text-[12px] font-bold text-red-700 mt-0.5">
+            ${formatPrice(tradeSetup.stopLoss)}
+          </div>
+          <div className="text-[9px] text-red-600 font-medium">
+            -{tradeSetup.slDistancePct.toFixed(2)}% buffer
+          </div>
+        </div>
+
+        <div className="p-2 rounded-lg bg-white border border-[#e4dccb]">
+          <div className="text-[10px] text-emerald-700 uppercase font-semibold">TP 1 (Opposite)</div>
+          <div className="text-[12px] font-bold text-emerald-800 mt-0.5">
+            ${formatPrice(tradeSetup.takeProfit1)}
+          </div>
+          <div className="text-[9px] text-emerald-700 font-medium">
+            +{tradeSetup.tp1DistancePct.toFixed(2)}%
+          </div>
+        </div>
+
+        <div className="p-2 rounded-lg bg-white border border-[#e4dccb]">
+          <div className="text-[10px] text-amber-700 uppercase font-semibold">R:R Ratio</div>
+          <div className="text-[12px] font-bold text-amber-800 mt-0.5">
+            1 : {tradeSetup.rrRatio.toFixed(2)}R
+          </div>
+          <div className="text-[9px] text-stone-500">TP2: ${formatPrice(tradeSetup.takeProfit2)}</div>
+        </div>
+      </div>
+
+      {/* Account Size & Risk % Calculator Controls */}
+      <div className="p-2.5 rounded-xl bg-[#f2ece0] border border-[#ded5c2] flex flex-wrap items-center justify-between gap-2.5 text-[11px]">
+        <div className="flex items-center gap-2">
+          <span className="text-stone-600 font-medium">Bal ($):</span>
+          <input
+            type="number"
+            value={accountBalance}
+            onChange={(e) => setAccountBalance(parseFloat(e.target.value) || 0)}
+            className="w-20 px-2 py-0.5 rounded border border-[#cfc5b0] bg-white font-bold text-stone-900 text-xs"
+          />
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="text-stone-600 font-medium">Risk (%):</span>
+          <select
+            value={riskPerTradePct}
+            onChange={(e) => setRiskPerTradePct(parseFloat(e.target.value) || 1.0)}
+            className="px-2 py-0.5 rounded border border-[#cfc5b0] bg-white font-bold text-stone-900 text-xs"
+          >
+            <option value={0.5}>0.5% (Conservative)</option>
+            <option value={1.0}>1.0% (Standard)</option>
+            <option value={2.0}>2.0% (Aggressive)</option>
+            <option value={3.0}>3.0% (Max)</option>
+          </select>
+        </div>
+
+        <div className="text-right ml-auto">
+          <span className="text-[10px] text-stone-500">Position Size: </span>
+          <span className="font-bold text-stone-900">
+            {tradeSetup.positionUnits.toFixed(4)} {baseAsset}
+          </span>
+          <span className="text-stone-500 text-[10px] block">
+            (${formatPrice(tradeSetup.notionalUsd, 0)} notional · ${formatPrice(tradeSetup.riskDollars, 0)} risk)
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,258 @@
+import { Anchor, X, Wifi, Layers, BarChart2, Award } from 'lucide-react';
+import { formatPrice } from '../../utils/formatters';
+
+export default function ModalHeader({
+  activeItem,
+  dataMode,
+  wsConnected,
+  priceTickFlash,
+  showAnchorPopover,
+  setShowAnchorPopover,
+  modalTab,
+  setModalTab,
+  onClose
+}) {
+  return (
+    <div className="shrink-0">
+      {/* Top Bar: Asset Emblem, Title, Price, Close */}
+      <div className="px-3.5 sm:px-5 pt-3.5 sm:pt-5 pb-2.5 flex items-start justify-between gap-2">
+        <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
+          {/* Asset Emblem */}
+          {activeItem.id === 'PAXGUSDT' ? (
+            <div
+              className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shrink-0"
+              style={{
+                backgroundColor: '#faf5e6',
+                border: '1.5px solid #d4b257',
+                color: '#9e7b1c',
+                fontFamily: "'JetBrains Mono', monospace",
+                fontWeight: 600,
+                fontSize: '16px'
+              }}
+            >
+              Au
+            </div>
+          ) : (
+            <div
+              className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shrink-0 shadow-sm p-1"
+              style={{
+                backgroundColor: '#fdfaf2',
+                border: '1.5px solid #e6dec8'
+              }}
+            >
+              <div
+                className="w-full h-full rounded-full flex items-center justify-center text-white font-bold text-lg sm:text-xl"
+                style={{ backgroundColor: activeItem.badgeColor }}
+              >
+                {activeItem.symbolBadge}
+              </div>
+            </div>
+          )}
+
+          <div className="min-w-0">
+            <h2
+              className="text-xl sm:text-[28px] leading-tight text-[#1e1d1a] truncate"
+              style={{
+                fontFamily: "'Playfair Display', Georgia, serif",
+                fontStyle: 'italic',
+                fontWeight: 700
+              }}
+            >
+              {activeItem.name}
+            </h2>
+            <div
+              className="flex flex-wrap items-center gap-1 sm:gap-1.5 mt-0.5 font-mono"
+            >
+              <span className="text-[11px] sm:text-xs text-[#7c776b] font-medium">
+                {activeItem.ticker.split('/')[0]}
+                <span className="opacity-70">/{activeItem.ticker.split('/')[1]}</span>
+              </span>
+
+              {activeItem.isPerp && (
+                <span
+                  className="text-[9px] sm:text-[10px] px-1.5 py-0.2 rounded font-semibold bg-[#fcf6e4] border border-[#d9be6c] text-[#997411]"
+                >
+                  PERP
+                </span>
+              )}
+
+              <span
+                className="text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.2 rounded font-semibold bg-[#fcf6e4] border border-[#d9be6c] text-[#997411]"
+              >
+                {activeItem.activeCycle}
+              </span>
+
+              {/* Custom Anchor Quick Pill */}
+              <button
+                onClick={() => setShowAnchorPopover(!showAnchorPopover)}
+                className="text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.2 rounded font-semibold flex items-center gap-1 transition active:scale-95"
+                style={{
+                  backgroundColor: showAnchorPopover ? '#262420' : '#f2ece0',
+                  border: '1px solid #d5ccb8',
+                  color: showAnchorPopover ? '#fcfaf5' : '#5c574f'
+                }}
+                title="Customize 0° Gann Base Pivot & Step Size"
+              >
+                <Anchor className="w-2.5 h-2.5" />
+                <span>0°=${formatPrice(activeItem.effectiveAnchor, 0)}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Price + 24h Pill + Close X */}
+        <div className="flex items-start gap-2 sm:gap-3 shrink-0">
+          <div className="text-right">
+            <div
+              className="text-lg sm:text-[20px] font-bold tracking-tight transition-colors duration-300 px-1 rounded font-mono"
+              style={{
+                color:
+                  priceTickFlash[activeItem.id] === 'up'
+                    ? '#1f7a46'
+                    : priceTickFlash[activeItem.id] === 'down'
+                    ? '#c93b37'
+                    : '#1e1d1a',
+                backgroundColor:
+                  priceTickFlash[activeItem.id] === 'up'
+                    ? '#e6f5ec'
+                    : priceTickFlash[activeItem.id] === 'down'
+                    ? '#fbe9e8'
+                    : 'transparent'
+              }}
+            >
+              ${formatPrice(activeItem.priceNow)}
+            </div>
+            <div className="mt-0.5 sm:mt-1 flex justify-end items-center gap-1 sm:gap-1.5">
+              {dataMode === 'live' && wsConnected && (
+                <span
+                  className="inline-flex items-center gap-0.5 text-[8px] sm:text-[9px] px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 font-mono font-bold"
+                  title="Sub-second Binance WebSocket Stream Active"
+                >
+                  <Wifi className="w-2 h-2 sm:w-2.5 sm:h-2.5" />
+                  LIVE
+                </span>
+              )}
+              <span
+                className="inline-flex items-center gap-0.5 text-[10px] sm:text-[11px] font-semibold px-2 py-0.2 rounded-full font-mono"
+                style={{
+                  backgroundColor: activeItem.change24h < 0 ? '#faeceb' : '#e5f5ec',
+                  border:
+                    activeItem.change24h < 0
+                      ? '1px solid #ecc6c4'
+                      : '1px solid #bce3cd',
+                  color: activeItem.change24h < 0 ? '#b93834' : '#216e43'
+                }}
+              >
+                {activeItem.change24h < 0 ? '▼' : '▲'}{' '}
+                {Math.abs(activeItem.change24h).toFixed(2)}%
+              </span>
+            </div>
+          </div>
+
+          <button
+            onClick={onClose}
+            className="text-[#8c8577] hover:text-[#1e1d1a] p-1.5 -mr-1 rounded-lg hover:bg-[#efe9dc] transition"
+            aria-label="Close modal"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+
+      {/* Tabs Switcher + Live Confluence & Wick Bar */}
+      <div className="px-3.5 sm:px-5 pb-2.5 flex flex-wrap items-center justify-between gap-2 border-b border-[#ece5d5]">
+        {/* View Switcher Tabs */}
+        <div className="inline-flex rounded-xl p-0.5 bg-[#efe9da] border border-[#dcd3c0] overflow-x-auto">
+          <button
+            onClick={() => setModalTab('ladder')}
+            className={`px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-semibold transition flex items-center gap-1 active:scale-95 ${
+              modalTab === 'ladder'
+                ? 'bg-[#fcfaf5] text-[#1e1d1a] shadow-sm'
+                : 'text-[#6e685c] hover:text-[#1e1d1a]'
+            }`}
+          >
+            <Layers className="w-3 h-3 text-amber-700" />
+            <span>Ladder</span>
+          </button>
+          <button
+            onClick={() => setModalTab('chart')}
+            className={`px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-semibold transition flex items-center gap-1 active:scale-95 ${
+              modalTab === 'chart'
+                ? 'bg-[#fcfaf5] text-[#1e1d1a] shadow-sm'
+                : 'text-[#6e685c] hover:text-[#1e1d1a]'
+            }`}
+          >
+            <BarChart2 className="w-3 h-3 text-emerald-700" />
+            <span>Chart</span>
+          </button>
+          <button
+            onClick={() => setModalTab('analytics')}
+            className={`px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-semibold transition flex items-center gap-1 active:scale-95 ${
+              modalTab === 'analytics'
+                ? 'bg-[#fcfaf5] text-[#1e1d1a] shadow-sm'
+                : 'text-[#6e685c] hover:text-[#1e1d1a]'
+            }`}
+          >
+            <Award className="w-3 h-3 text-amber-700" />
+            <span>Win-Rate</span>
+          </button>
+        </div>
+
+        {/* Live Confluence Badges: 14-Period RSI + 15m Wick Ratio Meter */}
+        <div className="flex items-center gap-1.5 font-mono ml-auto">
+          {/* 15m RSI Pill */}
+          <span
+            className="text-[9px] sm:text-[10px] px-2 py-0.5 sm:py-1 rounded-lg font-semibold border"
+            style={{
+              backgroundColor:
+                activeItem.rsi15m <= 33
+                  ? '#e6f4ec'
+                  : activeItem.rsi15m >= 67
+                  ? '#faeceb'
+                  : '#f5f0e4',
+              borderColor:
+                activeItem.rsi15m <= 33
+                  ? '#b4dec6'
+                  : activeItem.rsi15m >= 67
+                  ? '#e6b8b6'
+                  : '#ded6c3',
+              color:
+                activeItem.rsi15m <= 33
+                  ? '#216e43'
+                  : activeItem.rsi15m >= 67
+                  ? '#b93834'
+                  : '#5c574f'
+            }}
+            title="14-Period RSI Confluence Filter"
+          >
+            RSI {activeItem.rsi15m}
+          </span>
+
+          {/* 15m Rejection Wick Meter Pill */}
+          <div
+            className="px-2 py-0.5 sm:py-1 rounded-lg border flex items-center gap-1.5"
+            style={{
+              backgroundColor: activeItem.wickRatio >= 50 ? '#fcf6e4' : '#f5f0e4',
+              borderColor: activeItem.wickRatio >= 50 ? '#d9be6c' : '#ded6c3',
+              color: activeItem.wickRatio >= 50 ? '#997411' : '#5c574f'
+            }}
+            title="Latest 15m Candle Rejection Wick Ratio"
+          >
+            <span className="text-[9px] sm:text-[10px] font-semibold">
+              Wick {activeItem.wickRatio}%
+            </span>
+            <div className="w-6 sm:w-8 h-1.5 rounded-full bg-[#e3dccb] overflow-hidden">
+              <div
+                className="h-full rounded-full"
+                style={{
+                  width: `${Math.min(100, activeItem.wickRatio)}%`,
+                  backgroundColor: activeItem.wickRatio >= 50 ? '#c59416' : '#8c8577'
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
