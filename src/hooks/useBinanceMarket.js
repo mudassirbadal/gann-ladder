@@ -158,6 +158,28 @@ export function useBinanceMarket({ assets, dataMode }) {
     }
   }, [assets]);
 
+  const fetchKlinesByInterval = useCallback(async (symbol, interval = '4h', limit = 45) => {
+    try {
+      const res = await fetch(
+        `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`
+      );
+      if (res.ok) {
+        const raw = await res.json();
+        return raw.map((k) => ({
+          openTime: k[0],
+          open: parseFloat(k[1]),
+          high: parseFloat(k[2]),
+          low: parseFloat(k[3]),
+          close: parseFloat(k[4]),
+          closeTime: k[6]
+        }));
+      }
+    } catch (err) {
+      console.warn(`Failed to fetch ${interval} candles for ${symbol}:`, err);
+    }
+    return null;
+  }, []);
+
   useEffect(() => {
     let active = true;
     const run = async () => {
@@ -187,6 +209,7 @@ export function useBinanceMarket({ assets, dataMode }) {
     priceTickFlash,
     lastSyncTime,
     isSyncing,
-    fetchBinanceLiveMarket
+    fetchBinanceLiveMarket,
+    fetchKlinesByInterval
   };
 }

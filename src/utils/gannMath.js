@@ -78,29 +78,38 @@ export function calculateWickMetrics(candles) {
 }
 
 /**
- * Generates synthetic realistic OHLC candles around preset levels
+ * Generates synthetic realistic OHLC candles around preset levels across multiple timeframes
  */
-export function generatePresetCandles(asset, ladder) {
+export function generatePresetCandles(asset, ladder, interval = '4h') {
   const now = Date.now();
-  const stepMs = 4 * 3600 * 1000;
-  const pNow = asset.snapshotPrice;
+  const intervalsMap = {
+    '1m': { stepMs: 60 * 1000, volRatio: 0.04, count: 40 },
+    '3m': { stepMs: 3 * 60 * 1000, volRatio: 0.055, count: 40 },
+    '5m': { stepMs: 5 * 60 * 1000, volRatio: 0.075, count: 40 },
+    '15m': { stepMs: 15 * 60 * 1000, volRatio: 0.095, count: 38 },
+    '1h': { stepMs: 60 * 60 * 1000, volRatio: 0.12, count: 36 },
+    '4h': { stepMs: 4 * 60 * 60 * 1000, volRatio: 0.14, count: 36 }
+  };
+
+  const config = intervalsMap[interval] || intervalsMap['4h'];
+  const pNow = asset.snapshotPrice || asset.priceNow || 81500;
   const r1Price = ladder?.r1?.price || pNow * 1.012;
   const b1Price = ladder?.b1?.price || pNow * 0.985;
-  const volatility = (r1Price - b1Price) * 0.14;
+  const volatility = Math.max(1, (r1Price - b1Price) * config.volRatio);
 
   const synthetic = [];
-  let cursor = pNow * 1.018;
+  let cursor = pNow * 1.008;
 
-  for (let i = 36; i >= 0; i--) {
-    const t = now - i * stepMs;
-    const wave = Math.sin(i * 0.35) * volatility * 1.4;
+  for (let i = config.count; i >= 0; i--) {
+    const t = now - i * config.stepMs;
+    const wave = Math.sin(i * 0.35) * volatility * 1.35;
     const open = cursor;
     let close = pNow + wave + (i === 0 ? 0 : (Math.random() - 0.48) * volatility * 0.5);
     if (i === 0) close = pNow;
 
     const bodyMax = Math.max(open, close);
     const bodyMin = Math.min(open, close);
-    const extraWickMultiplier = i === 1 || i === 5 || i === 11 ? 1.85 : 0.65;
+    const extraWickMultiplier = i === 1 || i === 5 || i === 11 ? 1.75 : 0.65;
     const high = bodyMax + Math.abs(volatility * extraWickMultiplier * (0.4 + Math.random() * 0.5));
     const low = bodyMin - Math.abs(volatility * extraWickMultiplier * (0.4 + Math.random() * 0.5));
 
@@ -110,7 +119,7 @@ export function generatePresetCandles(asset, ladder) {
       high: Number(high.toFixed(2)),
       low: Number(low.toFixed(2)),
       close: Number(close.toFixed(2)),
-      closeTime: t + stepMs
+      closeTime: t + config.stepMs
     });
     cursor = close;
   }

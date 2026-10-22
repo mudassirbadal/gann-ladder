@@ -5,7 +5,8 @@ import {
   Settings,
   Smartphone,
   Radio,
-  Wifi
+  Wifi,
+  BookOpen
 } from 'lucide-react';
 
 export default function Header({
@@ -18,6 +19,7 @@ export default function Header({
   onOpenAlerts,
   onOpenSettings,
   onOpenPwa,
+  onOpenRules,
   onRefreshLive
 }) {
   return (
@@ -116,6 +118,17 @@ export default function Header({
                 {alertsCount}
               </span>
             )}
+          </button>
+
+          {/* Trading Rules Button */}
+          <button
+            onClick={onOpenRules}
+            className="px-2 sm:px-3 py-1.5 rounded-lg bg-[#fcfaf5] border border-[#dcd4c4] text-stone-800 hover:bg-[#f4efe4] active:scale-95 transition flex items-center gap-1.5 text-xs font-medium"
+            title="Gann Trading Rules & Playbook"
+            aria-label="Open trading rules"
+          >
+            <BookOpen className="w-3.5 h-3.5 text-amber-700" />
+            <span className="hidden sm:inline">Rules</span>
           </button>
 
           {/* Settings Button */}

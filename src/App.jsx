@@ -17,9 +17,11 @@ import AssetSelector from './components/AssetSelector';
 import ToastAlert from './components/ToastAlert';
 import MobileBottomNav from './components/MobileBottomNav';
 import GannModal from './components/Modal/GannModal';
+import TradingPlaybook from './components/TradingRules/TradingPlaybook';
 import AlertsDrawer from './components/Drawers/AlertsDrawer';
 import SettingsDrawer from './components/Drawers/SettingsDrawer';
 import PwaDrawer from './components/Drawers/PwaDrawer';
+import RulesDrawer from './components/Drawers/RulesDrawer';
 
 export default function App() {
   const [dataMode, setDataMode] = useState('reference');
@@ -119,7 +121,8 @@ export default function App() {
     liveCandles15m,
     wsConnected,
     priceTickFlash,
-    fetchBinanceLiveMarket
+    fetchBinanceLiveMarket,
+    fetchKlinesByInterval
   } = useBinanceMarket({ assets, dataMode });
 
   // Notification dispatcher
@@ -415,6 +418,7 @@ export default function App() {
         onOpenAlerts={() => setActiveDrawer('alerts')}
         onOpenSettings={() => setActiveDrawer('settings')}
         onOpenPwa={() => setActiveDrawer('pwa')}
+        onOpenRules={() => setActiveDrawer('rules')}
         onRefreshLive={fetchBinanceLiveMarket}
       />
 
@@ -436,6 +440,9 @@ export default function App() {
         onSimulateReaction={handleSimulateReaction}
         onResetPresets={handleResetPresets}
       />
+
+      {/* Interactive Gann Trading Playbook & Decision Rules */}
+      <TradingPlaybook />
 
       {/* Primary Gann Trading Terminal / Modal View */}
       <GannModal
@@ -462,6 +469,7 @@ export default function App() {
         setAssets={setAssets}
         onResetPresets={handleResetPresets}
         onSimulateReaction={handleSimulateReaction}
+        fetchKlinesByInterval={fetchKlinesByInterval}
       />
 
       {/* Mobile Bottom Thumb Navigation */}
@@ -472,7 +480,7 @@ export default function App() {
         setIsModalOpen={setIsModalOpen}
         alertsCount={alertsLog.length}
         onOpenAlerts={() => setActiveDrawer('alerts')}
-        onOpenSettings={() => setActiveDrawer('settings')}
+        onOpenRules={() => setActiveDrawer('rules')}
       />
 
       {/* Drawers */}
@@ -509,6 +517,11 @@ export default function App() {
 
       <PwaDrawer
         isOpen={activeDrawer === 'pwa'}
+        onClose={() => setActiveDrawer(null)}
+      />
+
+      <RulesDrawer
+        isOpen={activeDrawer === 'rules'}
         onClose={() => setActiveDrawer(null)}
       />
     </div>

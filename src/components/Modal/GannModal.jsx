@@ -27,7 +27,8 @@ export default function GannModal({
   assets,
   setAssets,
   onResetPresets,
-  onSimulateReaction
+  onSimulateReaction,
+  fetchKlinesByInterval
 }) {
   if (!isOpen || !activeItem) return null;
 
@@ -97,6 +98,8 @@ export default function GannModal({
           {modalTab === 'chart' && (
             <GannCandlestickChart
               activeItem={activeItem}
+              dataMode={dataMode}
+              fetchKlinesByInterval={fetchKlinesByInterval}
               onSelectLevel={(lvlId) => {
                 setModalTab('ladder');
                 setExpandedRowId(lvlId);

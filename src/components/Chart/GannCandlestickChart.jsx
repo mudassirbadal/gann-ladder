@@ -1,10 +1,61 @@
-import { useState, useMemo } from 'react';
-import { Crosshair } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
+import { Crosshair, Clock, Loader2 } from 'lucide-react';
 import { formatPrice } from '../../utils/formatters';
+import { generatePresetCandles } from '../../utils/gannMath';
 
-export default function GannCandlestickChart({ activeItem, onSelectLevel }) {
+const TIMEFRAMES = [
+  { id: '1m', label: '1m' },
+  { id: '3m', label: '3m' },
+  { id: '5m', label: '5m' },
+  { id: '15m', label: '15m' },
+  { id: '1h', label: '1h' },
+  { id: '4h', label: '4h' }
+];
+
+export default function GannCandlestickChart({
+  activeItem,
+  onSelectLevel,
+  dataMode,
+  fetchKlinesByInterval
+}) {
+  const [selectedTf, setSelectedTf] = useState('4h');
   const [hoverIdx, setHoverIdx] = useState(null);
-  const candles = useMemo(() => activeItem.chartCandles || [], [activeItem.chartCandles]);
+  const [customCandles, setCustomCandles] = useState(null);
+  const [isLoadingTf, setIsLoadingTf] = useState(false);
+
+  // Fetch candles when timeframe or asset changes
+  useEffect(() => {
+    let ignore = false;
+    const fetchTf = async () => {
+      if (dataMode === 'live' && fetchKlinesByInterval && activeItem?.id) {
+        setIsLoadingTf(true);
+        const res = await fetchKlinesByInterval(activeItem.id, selectedTf, 40);
+        if (!ignore) {
+          setIsLoadingTf(false);
+          if (res && res.length > 5) {
+            setCustomCandles(res);
+            return;
+          }
+        }
+      }
+      if (!ignore) {
+        const syn = generatePresetCandles(activeItem, activeItem?.ladder, selectedTf);
+        setCustomCandles(syn);
+        setIsLoadingTf(false);
+      }
+    };
+    fetchTf();
+    return () => {
+      ignore = true;
+    };
+  }, [dataMode, fetchKlinesByInterval, activeItem, selectedTf]);
+
+  // Use custom timeframe candles if available, else fallback
+  const candles = useMemo(() => {
+    if (customCandles && customCandles.length > 0) return customCandles;
+    return activeItem.chartCandles || [];
+  }, [customCandles, activeItem.chartCandles]);
+
   const allLevels = useMemo(
     () => [
       ...(activeItem.ladder?.above || []),
@@ -64,13 +115,44 @@ export default function GannCandlestickChart({ activeItem, onSelectLevel }) {
       className="space-y-2.5 touch-none select-none"
       onClick={(e) => e.stopPropagation()}
     >
+      {/* Timeframe Selector Bar */}
+      <div className="flex items-center justify-between gap-1.5 p-1 rounded-xl bg-[#ede7d8] border border-[#d8d0be]">
+        <div className="flex items-center gap-1 text-[10px] text-stone-600 font-mono pl-1.5 shrink-0">
+          <Clock className="w-3 h-3 text-amber-700" />
+          <span className="font-bold hidden xs:inline">Interval:</span>
+        </div>
+
+        <div className="grid grid-cols-6 gap-1 flex-1 max-w-[320px] ml-auto">
+          {TIMEFRAMES.map((tf) => {
+            const isActive = selectedTf === tf.id;
+            return (
+              <button
+                key={tf.id}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedTf(tf.id);
+                }}
+                className={`py-1 text-center rounded-lg text-[10px] sm:text-[11px] font-mono font-bold transition-all active:scale-95 ${
+                  isActive
+                    ? 'bg-[#262420] text-[#fcfaf5] shadow-xs'
+                    : 'text-stone-700 hover:bg-[#ded6c3] bg-white/50'
+                }`}
+              >
+                {tf.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Top OHLC Inspection Bar */}
       <div
         className="p-2 sm:p-2.5 rounded-xl bg-[#f5f0e4] border border-[#e0d8c5] flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 text-[10px] sm:text-[11px] font-mono shadow-xs"
       >
         <div className="flex items-center gap-1.5 font-bold text-[#1e1d1a]">
           <Crosshair className="w-3.5 h-3.5 text-amber-700" />
-          <span>4H Candles + Gann Grid</span>
+          <span>{selectedTf.toUpperCase()} Candles + Gann Grid</span>
+          {isLoadingTf && <Loader2 className="w-3 h-3 animate-spin text-amber-700 ml-1" />}
         </div>
         {hoveredCandle && (
           <div className="flex items-center gap-1.5 sm:gap-2 text-[9px] sm:text-[10px] text-stone-700 flex-wrap">
