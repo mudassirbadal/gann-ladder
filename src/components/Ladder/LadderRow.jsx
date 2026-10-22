@@ -16,7 +16,9 @@ export default function LadderRow({
   setAccountBalance,
   riskPerTradePct,
   setRiskPerTradePct,
-  onExecutePaperTrade
+  onExecutePaperTrade,
+  astroState,
+  confluenceSignal
 }) {
   const isUsed = lvl.rank === 'USED' || lvl.used;
   const isFinalRejection = lvl.rank === 'R1';
@@ -205,10 +207,17 @@ export default function LadderRow({
             </div>
           ) : isFinalRejection ? (
             <div>
-              <div
-                className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider leading-tight text-[#c59416] font-mono"
-              >
-                FINAL REJECTION ZONE
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span
+                  className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider leading-tight text-[#c59416] font-mono"
+                >
+                  FINAL REJECTION ZONE
+                </span>
+                {confluenceSignal?.downsideSignal && (
+                  <span className="text-[8.5px] sm:text-[9.5px] font-bold px-1.5 py-0.5 rounded bg-rose-100 border border-rose-200 text-rose-800">
+                    🔴 Astro Short Aligned ({astroState?.activeHora?.planet?.code} Hora)
+                  </span>
+                )}
               </div>
               <div className="text-[11px] sm:text-[12px] text-[#4a463f] mt-0.5 truncate">
                 {lvl.desc}
@@ -216,10 +225,17 @@ export default function LadderRow({
             </div>
           ) : isFinalBounce ? (
             <div>
-              <div
-                className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider leading-tight text-[#c59416] font-mono"
-              >
-                FINAL BOUNCE ZONE
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span
+                  className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider leading-tight text-[#c59416] font-mono"
+                >
+                  FINAL BOUNCE ZONE
+                </span>
+                {confluenceSignal?.upsideSignal && (
+                  <span className="text-[8.5px] sm:text-[9.5px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 border border-emerald-200 text-emerald-800">
+                    🟢 Astro Bounce Aligned ({astroState?.activeHora?.planet?.code} Hora)
+                  </span>
+                )}
               </div>
               <div className="text-[11px] sm:text-[12px] text-[#4a463f] mt-0.5 truncate">
                 {lvl.desc}
@@ -274,6 +290,7 @@ export default function LadderRow({
           riskPerTradePct={riskPerTradePct}
           setRiskPerTradePct={setRiskPerTradePct}
           onExecutePaperTrade={onExecutePaperTrade}
+          astroState={astroState}
         />
       )}
     </div>

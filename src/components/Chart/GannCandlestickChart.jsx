@@ -71,7 +71,8 @@ export default function GannCandlestickChart({
   activeItem,
   onSelectLevel,
   dataMode,
-  fetchKlinesByInterval
+  fetchKlinesByInterval,
+  confluenceSignal
 }) {
   const [selectedTf, setSelectedTf] = useState('4h');
   const [hoverIdx, setHoverIdx] = useState(null);
@@ -548,6 +549,58 @@ export default function GannCandlestickChart({
                   strokeDasharray="2 2"
                 />
                 <circle cx={width - padRight} cy={curY} r={3} fill="#d4ac2b" />
+              </g>
+            );
+          })()}
+
+          {/* Astro Vector Trajectory Path */}
+          {confluenceSignal && visibleCandles.length > 0 && (() => {
+            const lastCandleIdx = visibleCandles.length - 1;
+            const stepX = plotW / Math.max(1, visibleCandles.length);
+            const startX = padLeft + lastCandleIdx * stepX + stepX / 2;
+            const startY = priceToY(activeItem.priceNow);
+            const isShortPath = confluenceSignal.downsideSignal;
+            const targetPrice = isShortPath
+              ? (activeItem.ladder.b1?.price || activeItem.priceNow * 0.98)
+              : (activeItem.ladder.r1?.price || activeItem.priceNow * 1.02);
+            const targetY = priceToY(targetPrice);
+            const strokeColor = isShortPath ? '#c94a46' : '#2e8b57';
+            const arrowEndX = Math.min(width - padRight - 8, startX + 42);
+
+            return (
+              <g className="pointer-events-none">
+                <line
+                  x1={startX}
+                  y1={startY}
+                  x2={arrowEndX}
+                  y2={targetY}
+                  stroke={strokeColor}
+                  strokeWidth="2"
+                  strokeDasharray="4 3"
+                  opacity="0.85"
+                />
+                <circle cx={arrowEndX} cy={targetY} r="3.5" fill={strokeColor} />
+                <rect
+                  x={arrowEndX - 72}
+                  y={(startY + targetY) / 2 - 8}
+                  width="70"
+                  height="16"
+                  rx="3.5"
+                  fill={isShortPath ? '#fdedec' : '#e6f4ec'}
+                  stroke={strokeColor}
+                  strokeWidth="0.8"
+                />
+                <text
+                  x={arrowEndX - 37}
+                  y={(startY + targetY) / 2 + 3.5}
+                  textAnchor="middle"
+                  fontSize="7.5"
+                  fontFamily="JetBrains Mono, monospace"
+                  fontWeight="bold"
+                  fill={strokeColor}
+                >
+                  {isShortPath ? '↘ ASTRO SHORT' : '↗ ASTRO LONG'}
+                </text>
               </g>
             );
           })()}

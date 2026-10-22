@@ -11,7 +11,8 @@ export default function TradeSetupCalculator({
   setAccountBalance,
   riskPerTradePct,
   setRiskPerTradePct,
-  onExecutePaperTrade
+  onExecutePaperTrade,
+  astroState
 }) {
   const [copied, setCopied] = useState(false);
   const [tradeTaken, setTradeTaken] = useState(false);
@@ -59,13 +60,17 @@ export default function TradeSetupCalculator({
 
   const handleCopySetup = (e) => {
     e.stopPropagation();
+    const astroRead = astroState?.activeHora?.planet
+      ? `\nAstro Read: ${astroState.activeHora.planet.name} Hora (${astroState.activeHora.bias?.label} ${astroState.activeHora.bias?.base}%) · Moon in ${astroState.nakshatra?.name || ''}`
+      : '';
     const text =
       `${ticker} ${tradeSetup.direction} [${lvl.rank} · ${lvl.degree}°]\n` +
       `Entry: $${formatPrice(tradeSetup.entry)}\n` +
       `Stop-Loss: $${formatPrice(tradeSetup.stopLoss)} (-${tradeSetup.slDistancePct.toFixed(2)}%)\n` +
       `TP1: $${formatPrice(tradeSetup.takeProfit1)} (+${tradeSetup.tp1DistancePct.toFixed(2)}%)\n` +
       `TP2: $${formatPrice(tradeSetup.takeProfit2)}\n` +
-      `R:R: ${tradeSetup.rrRatio.toFixed(2)}R | Size: ${tradeSetup.positionUnits.toFixed(4)} ${baseAsset} ($${formatPrice(tradeSetup.riskDollars)} risk)`;
+      `R:R: ${tradeSetup.rrRatio.toFixed(2)}R | Size: ${tradeSetup.positionUnits.toFixed(4)} ${baseAsset} ($${formatPrice(tradeSetup.riskDollars)} risk)` +
+      astroRead;
 
     navigator.clipboard?.writeText(text);
     setCopied(true);
@@ -187,6 +192,19 @@ export default function TradeSetupCalculator({
           </span>
         </div>
       </div>
+
+      {/* Optional Astro Confluence Readout */}
+      {astroState?.activeHora && (
+        <div className="flex items-center justify-between text-[10.5px] px-2.5 py-1 rounded-lg bg-white/70 border border-[#dfd6c2] text-stone-600">
+          <span className="font-semibold text-amber-800 flex items-center gap-1">
+            <span>{astroState.activeHora.planet.glyph}</span>
+            <span>{astroState.activeHora.planet.name} Hora</span>
+          </span>
+          <span className="text-[10px] text-stone-500 font-mono">
+            {astroState.activeHora.bias.label} ({astroState.activeHora.bias.base}%) · {astroState.activeHora.minsRemaining}m left · Moon in {astroState.nakshatra?.name}
+          </span>
+        </div>
+      )}
     </div>
   );
 }

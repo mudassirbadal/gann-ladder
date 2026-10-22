@@ -25,6 +25,7 @@ import PwaDrawer from './components/Drawers/PwaDrawer';
 import RulesDrawer from './components/Drawers/RulesDrawer';
 import TradingJournalDrawer from './components/Journal/TradingJournalDrawer';
 import { usePaperTrading } from './hooks/usePaperTrading';
+import { useAstroEngine } from './hooks/useAstroEngine';
 
 export default function App() {
   const [dataMode, setDataMode] = useState('reference');
@@ -401,7 +402,20 @@ export default function App() {
     setAssets(INITIAL_ASSETS);
   };
 
+  // Graha Chakra Astro Engine
+  const {
+    astroState,
+    astroOverride,
+    setAstroOverride,
+    getConfluenceSignal
+  } = useAstroEngine();
+
   const activeItem = computedLadders[selectedSymbol];
+
+  const confluenceSignal = useMemo(
+    () => getConfluenceSignal(activeItem),
+    [getConfluenceSignal, activeItem]
+  );
 
   // Proximity Radar: Detect approaching R1/B1 within 0.22% and trigger early warning
   useEffect(() => {
@@ -533,6 +547,10 @@ export default function App() {
         onExecutePaperTrade={(setup, lvl) =>
           paperTrading.executePaperTrade(setup, activeItem, lvl?.rank, lvl?.degree)
         }
+        astroState={astroState}
+        astroOverride={astroOverride}
+        setAstroOverride={setAstroOverride}
+        confluenceSignal={confluenceSignal}
       />
 
       {/* Mobile Bottom Thumb Navigation */}

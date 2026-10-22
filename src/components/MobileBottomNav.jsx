@@ -1,4 +1,4 @@
-import { Layers, BarChart2, Bell, BookOpen, Briefcase } from 'lucide-react';
+import { Layers, BarChart2, Bell, BookOpen, Briefcase, Compass } from 'lucide-react';
 
 export default function MobileBottomNav({
   modalTab,
@@ -44,6 +44,22 @@ export default function MobileBottomNav({
         >
           <BarChart2 className="w-4 h-4" />
           <span className="text-[10px] mt-0.5 font-medium">Chart</span>
+        </button>
+
+        {/* Astro Tab */}
+        <button
+          onClick={() => {
+            setIsModalOpen(true);
+            setModalTab('astro');
+          }}
+          className={`flex flex-col items-center justify-center p-1 rounded-xl min-w-[50px] transition active:scale-95 ${
+            isModalOpen && modalTab === 'astro'
+              ? 'text-purple-800 font-bold bg-[#f1e9f7]'
+              : 'text-stone-500 hover:text-stone-800'
+          }`}
+        >
+          <Compass className="w-4 h-4" />
+          <span className="text-[10px] mt-0.5 font-medium">Astro</span>
         </button>
 
         {/* Journal Tab */}

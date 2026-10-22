@@ -3,6 +3,7 @@ import AnchorPopover from './AnchorPopover';
 import LadderView from '../Ladder/LadderView';
 import GannCandlestickChart from '../Chart/GannCandlestickChart';
 import GannAnalyticsPanel from '../Analytics/GannAnalyticsPanel';
+import GrahaChakraPanel from '../Astro/GrahaChakraPanel';
 
 export default function GannModal({
   isOpen,
@@ -29,7 +30,11 @@ export default function GannModal({
   onResetPresets,
   onSimulateReaction,
   fetchKlinesByInterval,
-  onExecutePaperTrade
+  onExecutePaperTrade,
+  astroState,
+  astroOverride,
+  setAstroOverride,
+  confluenceSignal
 }) {
   if (!isOpen || !activeItem) return null;
 
@@ -93,15 +98,25 @@ export default function GannModal({
               riskPerTradePct={riskPerTradePct}
               setRiskPerTradePct={setRiskPerTradePct}
               onExecutePaperTrade={onExecutePaperTrade}
+              astroState={astroState}
+              astroOverride={astroOverride}
+              setAstroOverride={setAstroOverride}
+              confluenceSignal={confluenceSignal}
             />
           )}
 
-          {/* TAB 2: Candlestick + Gann Overlay Chart */}
+          {/* TAB 2: Graha Astro Wheel & Ephemeris */}
+          {modalTab === 'astro' && (
+            <GrahaChakraPanel astroState={astroState} />
+          )}
+
+          {/* TAB 3: Candlestick + Gann Overlay Chart */}
           {modalTab === 'chart' && (
             <GannCandlestickChart
               activeItem={activeItem}
               dataMode={dataMode}
               fetchKlinesByInterval={fetchKlinesByInterval}
+              confluenceSignal={confluenceSignal}
               onSelectLevel={(lvlId) => {
                 setModalTab('ladder');
                 setExpandedRowId(lvlId);
@@ -109,7 +124,7 @@ export default function GannModal({
             />
           )}
 
-          {/* TAB 3: Win Rate & Confluence Analytics */}
+          {/* TAB 4: Win Rate & Confluence Analytics */}
           {modalTab === 'analytics' && (
             <GannAnalyticsPanel
               activeItem={activeItem}

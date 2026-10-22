@@ -1,5 +1,6 @@
 import { formatPrice } from '../../utils/formatters';
 import LadderRow from './LadderRow';
+import AstroSignalBanner from '../Astro/AstroSignalBanner';
 
 export default function LadderView({
   activeItem,
@@ -9,7 +10,11 @@ export default function LadderView({
   setAccountBalance,
   riskPerTradePct,
   setRiskPerTradePct,
-  onExecutePaperTrade
+  onExecutePaperTrade,
+  astroState,
+  astroOverride,
+  setAstroOverride,
+  confluenceSignal
 }) {
   const r1 = activeItem.ladder.r1;
   const b1 = activeItem.ladder.b1;
@@ -24,6 +29,14 @@ export default function LadderView({
 
   return (
     <div className="space-y-2.5 sm:space-y-3">
+      {/* Astro-Gann Directional Signal Decision Banner */}
+      <AstroSignalBanner
+        astroState={astroState}
+        astroOverride={astroOverride}
+        setAstroOverride={setAstroOverride}
+        confluenceSignal={confluenceSignal}
+      />
+
       {/* Top 2 Summary Cards: Final Rejection & Final Bounce */}
       <div className="grid grid-cols-2 gap-2 sm:gap-3">
         {/* Final Rejection Card */}
@@ -188,6 +201,8 @@ export default function LadderView({
             riskPerTradePct={riskPerTradePct}
             setRiskPerTradePct={setRiskPerTradePct}
             onExecutePaperTrade={onExecutePaperTrade}
+            astroState={astroState}
+            confluenceSignal={confluenceSignal}
           />
         ))}
       </div>
@@ -233,6 +248,8 @@ export default function LadderView({
             riskPerTradePct={riskPerTradePct}
             setRiskPerTradePct={setRiskPerTradePct}
             onExecutePaperTrade={onExecutePaperTrade}
+            astroState={astroState}
+            confluenceSignal={confluenceSignal}
           />
         ))}
       </div>

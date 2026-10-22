@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Anchor, X, Wifi, Layers, BarChart2, Award } from 'lucide-react';
+import { Anchor, X, Wifi, Layers, BarChart2, Award, Compass } from 'lucide-react';
 import { formatPrice } from '../../utils/formatters';
 import CustomDropdown from '../Common/CustomDropdown';
 
@@ -235,6 +235,17 @@ export default function ModalHeader({
           >
             <Layers className="w-3 h-3 text-amber-700" />
             <span>Ladder</span>
+          </button>
+          <button
+            onClick={() => setModalTab('astro')}
+            className={`px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-semibold transition flex items-center gap-1 active:scale-95 ${
+              modalTab === 'astro'
+                ? 'bg-[#fcfaf5] text-[#1e1d1a] shadow-sm'
+                : 'text-[#6e685c] hover:text-[#1e1d1a]'
+            }`}
+          >
+            <Compass className="w-3 h-3 text-purple-700" />
+            <span>Astro</span>
           </button>
           <button
             onClick={() => setModalTab('chart')}
