@@ -81,34 +81,57 @@ export default function MobileMenuDrawer({
 
           {/* Paper Trading & Auto-Bot Quick Card */}
           <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[#262420] to-[#1c1b18] text-[#fcfaf5] shadow-md border border-[#3e3a32]">
-            <div className="flex items-center justify-between pb-2 border-b border-stone-700/60">
-              <div className="flex items-center gap-1.5">
-                <Cpu className="w-4 h-4 text-emerald-400" />
-                <span className="text-xs font-bold font-mono tracking-wider">
-                  PAPER AUTO-TRADING BOT
-                </span>
+            <div className="flex items-center justify-between pb-2.5 border-b border-stone-700/60">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                  <Cpu className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold font-mono tracking-wider flex items-center gap-1.5">
+                    <span>AUTO-TRADING BOT</span>
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full ${
+                        autoTradingEnabled ? 'bg-emerald-400 animate-pulse' : 'bg-stone-500'
+                      }`}
+                    />
+                  </div>
+                  <div className="text-[9px] text-stone-400 font-mono">
+                    1:1000 Lev · 1:2 R:R · $300 Base
+                  </div>
+                </div>
               </div>
-              <span
-                className={`text-[9px] font-mono px-2 py-0.5 rounded-full font-bold flex items-center gap-1 ${
-                  autoTradingEnabled
-                    ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-700'
-                    : 'bg-stone-800 text-stone-400 border border-stone-600'
-                }`}
-              >
-                <span
-                  className={`w-1.5 h-1.5 rounded-full ${
-                    autoTradingEnabled ? 'bg-emerald-400 animate-pulse' : 'bg-stone-500'
+
+              {/* Bot Toggle Switch */}
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] font-mono font-bold text-stone-300">
+                  {autoTradingEnabled ? 'ON' : 'OFF'}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => paperTrading?.toggleAutoTrading?.()}
+                  className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${
+                    autoTradingEnabled ? 'bg-emerald-500' : 'bg-stone-700'
                   }`}
-                />
-                {autoTradingEnabled ? 'BOT ACTIVE' : 'PAUSED'}
-              </span>
+                  aria-label="Toggle auto trading bot"
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                      autoTradingEnabled ? 'translate-x-4' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+              </div>
             </div>
 
+            {/* Account Metrics Grid */}
             <div className="grid grid-cols-2 gap-2 my-2.5 font-mono">
               <div className="p-2 rounded-xl bg-white/5 border border-white/10">
                 <div className="text-[9px] text-stone-400 uppercase">Account Equity</div>
                 <div className="text-sm font-bold text-white mt-0.5">
                   ${formatPrice(currentEquity)}
+                </div>
+                <div className="text-[8px] text-stone-400 mt-0.5">
+                  Start: $300 · Lev 1:1000
                 </div>
               </div>
               <div className="p-2 rounded-xl bg-white/5 border border-white/10">
@@ -118,13 +141,23 @@ export default function MobileMenuDrawer({
                     normalized100Profit >= 0 ? 'text-emerald-400' : 'text-red-400'
                   }`}
                 >
-                  ${formatPrice(normalized100Current)}{' '}
-                  <span className="text-[10px]">
-                    ({normalized100Profit >= 0 ? '+' : ''}
-                    {normalized100Profit.toFixed(1)}%)
-                  </span>
+                  ${formatPrice(normalized100Current)}
+                </div>
+                <div
+                  className={`text-[8px] mt-0.5 font-semibold ${
+                    normalized100Profit >= 0 ? 'text-emerald-400' : 'text-red-400'
+                  }`}
+                >
+                  {normalized100Profit >= 0 ? '+' : ''}
+                  {normalized100Profit.toFixed(1)}% Return
                 </div>
               </div>
+            </div>
+
+            {/* Rules Badge Bar */}
+            <div className="px-2 py-1 rounded-lg bg-white/5 border border-white/10 mb-2.5 text-[9px] font-mono text-stone-300 flex items-center justify-between">
+              <span>SL: Gold 15pt ($15) · BTC $15 · Alt $10</span>
+              <span className="text-amber-400 font-bold">1:2 R:R</span>
             </div>
 
             <button

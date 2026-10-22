@@ -70,12 +70,7 @@ export default function MobileBottomNav({
           className="flex flex-col items-center justify-center py-1 rounded-xl text-stone-500 hover:text-stone-800 relative transition active:scale-95"
         >
           <Briefcase className="w-4 h-4 text-stone-700" />
-          <span className="text-[10px] mt-0.5 font-medium flex items-center gap-0.5">
-            Journal
-            {autoTradingEnabled && (
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            )}
-          </span>
+          <span className="text-[10px] mt-0.5 font-medium">Journal</span>
           {openTradesCount > 0 && (
             <span
               className="absolute top-0.5 right-2 px-1 rounded-full text-[8px] font-bold bg-emerald-600 text-white font-mono"

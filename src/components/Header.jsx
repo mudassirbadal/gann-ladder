@@ -126,21 +126,15 @@ export default function Header({
             )}
           </button>
 
-          {/* Paper Trading Journal Button */}
+          {/* Paper Trading Journal Button (Desktop) */}
           <button
             onClick={onOpenJournal}
-            className="relative px-2 sm:px-3 py-1.5 rounded-lg bg-[#fcfaf5] border border-[#dcd4c4] text-stone-800 hover:bg-[#f4efe4] active:scale-95 transition flex items-center gap-1.5 text-xs font-medium"
-            title="Paper Trading Journal & Auto-Bot"
+            className="hidden sm:flex px-2 sm:px-3 py-1.5 rounded-lg bg-[#fcfaf5] border border-[#dcd4c4] text-stone-800 hover:bg-[#f4efe4] active:scale-95 transition items-center gap-1.5 text-xs font-medium"
+            title="Paper Trading Journal"
             aria-label="Open trading journal"
           >
             <Briefcase className="w-3.5 h-3.5 text-stone-700" />
-            <span className="hidden sm:inline">Journal</span>
-            {autoTradingEnabled && (
-              <span className="px-1 py-0.2 rounded text-[8px] font-bold bg-amber-100 text-amber-900 border border-amber-300 font-mono flex items-center gap-0.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                BOT
-              </span>
-            )}
+            <span>Journal</span>
             {openTradesCount > 0 && (
               <span className="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-emerald-100 text-emerald-800 font-mono">
                 {openTradesCount}
@@ -180,11 +174,11 @@ export default function Header({
             <span>Install App</span>
           </button>
 
-          {/* Mobile Hamburger Menu Button */}
+          {/* Mobile Hamburger Menu Button on Right Side */}
           <button
             onClick={onOpenMenu}
-            className="sm:hidden p-1.5 rounded-lg bg-[#2b2925] text-amber-400 hover:bg-stone-800 active:scale-95 transition flex items-center justify-center shadow-xs"
-            title="Open Mobile Navigation Menu"
+            className="sm:hidden p-1.5 px-2 rounded-lg bg-[#262420] text-amber-400 hover:bg-stone-800 active:scale-95 transition flex items-center justify-center gap-1 shadow-xs ml-1"
+            title="Open Navigation Menu"
             aria-label="Open navigation menu"
           >
             <Menu className="w-4 h-4" />
