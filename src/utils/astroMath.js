@@ -335,6 +335,9 @@ export function computeFullAstroState(date, astroOverride = "bearish_short") {
   const moonPos = positions.find((p) => p.key === "moon");
   const nakshatra = nakshatraOf(moonPos.lon, date);
 
+  const activeHoraIdx = hours.findIndex((h) => h.isNow);
+  let nextHora = activeHoraIdx !== -1 ? hours[(activeHoraIdx + 1) % hours.length] : (hours[1] || hours[0]);
+
   let masterScore = transitScore;
   if (astroOverride === "bearish_short") {
     masterScore = 32;
@@ -346,6 +349,13 @@ export function computeFullAstroState(date, astroOverride = "bearish_short") {
       startHr: 14.0,
       endHr: 15.0
     };
+    nextHora = {
+      planetKey: "jupiter",
+      planet: PLANET_BY_KEY.jupiter,
+      bias: { tag: "rise", label: "Bullish", base: 78 },
+      startHr: 15.0,
+      endHr: 16.0
+    };
     voc = { ...voc, isVoC: false };
   } else if (astroOverride === "bullish_long") {
     masterScore = 72;
@@ -356,6 +366,13 @@ export function computeFullAstroState(date, astroOverride = "bearish_short") {
       minsRemaining: 42,
       startHr: 14.0,
       endHr: 15.0
+    };
+    nextHora = {
+      planetKey: "mars",
+      planet: PLANET_BY_KEY.mars,
+      bias: { tag: "fall", label: "Bearish", base: 65 },
+      startHr: 15.0,
+      endHr: 16.0
     };
     voc = { ...voc, isVoC: false };
   } else if (astroOverride === "voc_veto") {
@@ -377,6 +394,7 @@ export function computeFullAstroState(date, astroOverride = "bearish_short") {
     tightest: pairs[0] || null,
     hours,
     activeHora,
+    nextHora,
     voc,
     nakshatra,
     masterScore,

@@ -19,6 +19,7 @@ import MobileBottomNav from './components/MobileBottomNav';
 import GannModal from './components/Modal/GannModal';
 import TradingPlaybook from './components/TradingRules/TradingPlaybook';
 import ProximityRadar from './components/Radar/ProximityRadar';
+import AstroDirectiveHeader from './components/Astro/AstroDirectiveHeader';
 import AlertsDrawer from './components/Drawers/AlertsDrawer';
 import SettingsDrawer from './components/Drawers/SettingsDrawer';
 import PwaDrawer from './components/Drawers/PwaDrawer';
@@ -32,7 +33,7 @@ export default function App() {
   const [dataMode, setDataMode] = useState('reference');
   const [assets, setAssets] = useState(INITIAL_ASSETS);
   const [selectedSymbol, setSelectedSymbol] = useState('BTCUSDT');
-  const [isModalOpen, setIsModalOpen] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalTab, setModalTab] = useState('ladder');
   const [expandedRowId, setExpandedRowId] = useState(null);
 
@@ -508,6 +509,17 @@ export default function App() {
         selectedAsset={activeItem}
         onOpenModal={() => setIsModalOpen(true)}
       />
+
+      {/* Simplified Astro Directive Header & Hora Countdown Turn-Time Bar */}
+      <div className="max-w-5xl mx-auto px-3 sm:px-6 mb-3 sm:mb-4">
+        <AstroDirectiveHeader
+          astroState={astroState}
+          astroOverride={astroOverride}
+          setAstroOverride={setAstroOverride}
+          confluenceSignal={confluenceSignal}
+          activeItem={activeItem}
+        />
+      </div>
 
       {/* Real-Time Gann Proximity Radar */}
       <div className="max-w-5xl mx-auto px-3 sm:px-6 mb-3 sm:mb-4">

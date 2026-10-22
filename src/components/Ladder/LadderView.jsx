@@ -1,6 +1,6 @@
 import { formatPrice } from '../../utils/formatters';
 import LadderRow from './LadderRow';
-import AstroSignalBanner from '../Astro/AstroSignalBanner';
+import AstroDirectiveHeader from '../Astro/AstroDirectiveHeader';
 
 export default function LadderView({
   activeItem,
@@ -29,12 +29,13 @@ export default function LadderView({
 
   return (
     <div className="space-y-2.5 sm:space-y-3">
-      {/* Astro-Gann Directional Signal Decision Banner */}
-      <AstroSignalBanner
+      {/* Simplified Astro Directive Header & Hora Countdown Turn-Time Bar */}
+      <AstroDirectiveHeader
         astroState={astroState}
         astroOverride={astroOverride}
         setAstroOverride={setAstroOverride}
         confluenceSignal={confluenceSignal}
+        activeItem={activeItem}
       />
 
       {/* Top 2 Summary Cards: Final Rejection & Final Bounce */}
