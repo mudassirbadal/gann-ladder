@@ -3,6 +3,8 @@ import { formatPrice } from '../../utils/formatters';
 
 export default function ModalHeader({
   activeItem,
+  allAssets,
+  onSelectSymbol,
   dataMode,
   wsConnected,
   priceTickFlash,
@@ -12,10 +14,43 @@ export default function ModalHeader({
   setModalTab,
   onClose
 }) {
+  const assetsList = allAssets ? Object.values(allAssets) : [];
+
   return (
-    <div className="shrink-0">
-      {/* Top Bar: Asset Emblem, Title, Price, Close */}
-      <div className="px-3.5 sm:px-5 pt-3.5 sm:pt-5 pb-2.5 flex items-start justify-between gap-2">
+    <div className="shrink-0 border-b border-[#ece5d5]">
+      {/* Quick 5-Coin Switcher Row directly inside modal header */}
+      {assetsList.length > 0 && (
+        <div className="px-3 sm:px-5 pt-2.5 pb-2 bg-[#f4efe2] border-b border-[#e5decb]">
+          <div className="grid grid-cols-5 gap-1 sm:gap-1.5">
+            {assetsList.map((coin) => {
+              const isCurrent = activeItem.id === coin.id;
+              return (
+                <button
+                  key={coin.id}
+                  onClick={() => onSelectSymbol && onSelectSymbol(coin.id)}
+                  className={`py-1 px-1 sm:px-2 rounded-lg text-[10px] sm:text-xs font-semibold flex items-center justify-center gap-1 transition-all active:scale-95 ${
+                    isCurrent
+                      ? 'bg-[#262420] text-[#fcfaf5] shadow-xs ring-1 ring-[#c59416]'
+                      : 'bg-[#fcfaf5] text-stone-700 hover:bg-[#ede6d6] border border-[#dcd3bf]'
+                  }`}
+                  title={`${coin.name} ($${formatPrice(coin.priceNow)})`}
+                >
+                  <span
+                    className="w-3.5 h-3.5 rounded-full flex items-center justify-center text-[8px] font-bold text-white shrink-0"
+                    style={{ backgroundColor: coin.badgeColor }}
+                  >
+                    {coin.symbolBadge}
+                  </span>
+                  <span className="truncate">{coin.name}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Main Asset Header: Emblem, Title, Price, Close */}
+      <div className="px-3.5 sm:px-5 pt-3 pb-2.5 flex items-start justify-between gap-2">
         <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
           {/* Asset Emblem */}
           {activeItem.id === 'PAXGUSDT' ? (
@@ -60,25 +95,19 @@ export default function ModalHeader({
             >
               {activeItem.name}
             </h2>
-            <div
-              className="flex flex-wrap items-center gap-1 sm:gap-1.5 mt-0.5 font-mono"
-            >
+            <div className="flex flex-wrap items-center gap-1 sm:gap-1.5 mt-0.5 font-mono">
               <span className="text-[11px] sm:text-xs text-[#7c776b] font-medium">
                 {activeItem.ticker.split('/')[0]}
                 <span className="opacity-70">/{activeItem.ticker.split('/')[1]}</span>
               </span>
 
               {activeItem.isPerp && (
-                <span
-                  className="text-[9px] sm:text-[10px] px-1.5 py-0.2 rounded font-semibold bg-[#fcf6e4] border border-[#d9be6c] text-[#997411]"
-                >
+                <span className="text-[9px] sm:text-[10px] px-1.5 py-0.2 rounded font-semibold bg-[#fcf6e4] border border-[#d9be6c] text-[#997411]">
                   PERP
                 </span>
               )}
 
-              <span
-                className="text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.2 rounded font-semibold bg-[#fcf6e4] border border-[#d9be6c] text-[#997411]"
-              >
+              <span className="text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.2 rounded font-semibold bg-[#fcf6e4] border border-[#d9be6c] text-[#997411]">
                 {activeItem.activeCycle}
               </span>
 
@@ -160,7 +189,7 @@ export default function ModalHeader({
       </div>
 
       {/* Tabs Switcher + Live Confluence & Wick Bar */}
-      <div className="px-3.5 sm:px-5 pb-2.5 flex flex-wrap items-center justify-between gap-2 border-b border-[#ece5d5]">
+      <div className="px-3.5 sm:px-5 pb-2.5 flex flex-wrap items-center justify-between gap-2">
         {/* View Switcher Tabs */}
         <div className="inline-flex rounded-xl p-0.5 bg-[#efe9da] border border-[#dcd3c0] overflow-x-auto">
           <button

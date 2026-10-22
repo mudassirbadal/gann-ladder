@@ -7,6 +7,8 @@ import GannAnalyticsPanel from '../Analytics/GannAnalyticsPanel';
 export default function GannModal({
   isOpen,
   activeItem,
+  allAssets,
+  onSelectSymbol,
   onClose,
   dataMode,
   wsConnected,
@@ -31,21 +33,27 @@ export default function GannModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-auto"
-      style={{ backgroundColor: 'rgba(38, 35, 29, 0.52)', backdropFilter: 'blur(3px)' }}
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden overscroll-contain"
+      style={{ backgroundColor: 'rgba(38, 35, 29, 0.55)', backdropFilter: 'blur(3px)' }}
+      onTouchMove={(e) => {
+        if (e.target === e.currentTarget) e.preventDefault();
+      }}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
       <div
-        className="w-full sm:max-w-[560px] rounded-t-[28px] sm:rounded-[26px] shadow-2xl border border-[#e2dac7] overflow-hidden transition-all flex flex-col bg-[#fcfaf5] h-[92vh] sm:h-auto sm:max-h-[92vh] my-0 sm:my-auto"
+        className="w-full sm:max-w-[560px] rounded-t-[28px] sm:rounded-[26px] shadow-2xl border border-[#e2dac7] overflow-hidden transition-all flex flex-col bg-[#fcfaf5] h-[92vh] sm:h-auto sm:max-h-[92vh] my-0 sm:my-auto overscroll-contain"
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Mobile Pull/Drag Indicator */}
         <div className="w-12 h-1.5 bg-[#dcd5c4] rounded-full mx-auto mt-2 sm:hidden shrink-0" />
 
-        {/* Modal Header */}
+        {/* Modal Header with 5-coin switcher */}
         <ModalHeader
           activeItem={activeItem}
+          allAssets={allAssets}
+          onSelectSymbol={onSelectSymbol}
           dataMode={dataMode}
           wsConnected={wsConnected}
           priceTickFlash={priceTickFlash}
@@ -68,7 +76,10 @@ export default function GannModal({
         )}
 
         {/* Scrollable Modal Body */}
-        <div className="px-3.5 sm:px-5 pb-5 pt-2.5 overflow-y-auto space-y-3 flex-1 scrollbar-thin">
+        <div
+          className="px-3.5 sm:px-5 pb-5 pt-2.5 overflow-y-auto space-y-3 flex-1 scrollbar-thin overscroll-contain"
+          style={{ WebkitOverflowScrolling: 'touch' }}
+        >
           {/* TAB 1: Gann Ladder View */}
           {modalTab === 'ladder' && (
             <LadderView

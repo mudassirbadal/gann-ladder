@@ -44,11 +44,29 @@ export default function GannCandlestickChart({ activeItem, onSelectLevel }) {
   const hoveredCandle =
     hoverIdx !== null && candles[hoverIdx] ? candles[hoverIdx] : candles[candles.length - 1];
 
+  const handleTouchMove = (e) => {
+    e.stopPropagation();
+    if (!e.touches || e.touches.length === 0) return;
+    const touch = e.touches[0];
+    const rect = e.currentTarget.getBoundingClientRect();
+    const touchX = touch.clientX - rect.left;
+    const svgX = (touchX / rect.width) * width;
+    const relX = svgX - padLeft;
+    if (relX >= 0 && relX <= plotW && candles.length > 0) {
+      const stepX = plotW / candles.length;
+      const idx = Math.min(candles.length - 1, Math.max(0, Math.floor(relX / stepX)));
+      setHoverIdx(idx);
+    }
+  };
+
   return (
-    <div className="space-y-2.5">
+    <div
+      className="space-y-2.5 touch-none select-none"
+      onClick={(e) => e.stopPropagation()}
+    >
       {/* Top OHLC Inspection Bar */}
       <div
-        className="p-2 sm:p-2.5 rounded-xl bg-[#f5f0e4] border border-[#e0d8c5] flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 text-[10px] sm:text-[11px] font-mono"
+        className="p-2 sm:p-2.5 rounded-xl bg-[#f5f0e4] border border-[#e0d8c5] flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 text-[10px] sm:text-[11px] font-mono shadow-xs"
       >
         <div className="flex items-center gap-1.5 font-bold text-[#1e1d1a]">
           <Crosshair className="w-3.5 h-3.5 text-amber-700" />
@@ -67,11 +85,17 @@ export default function GannCandlestickChart({ activeItem, onSelectLevel }) {
       </div>
 
       {/* Interactive SVG Plot */}
-      <div className="rounded-2xl border border-[#dfd7c5] bg-[#fdfbf6] p-1 sm:p-2 overflow-hidden shadow-inner">
+      <div
+        className="rounded-2xl border border-[#dfd7c5] bg-[#fdfbf6] p-1 sm:p-2 overflow-hidden shadow-inner relative"
+        style={{ touchAction: 'none' }}
+      >
         <svg
           viewBox={`0 0 ${width} ${height}`}
-          className="w-full h-auto select-none touch-none"
+          className="w-full h-auto select-none"
+          style={{ touchAction: 'none' }}
           onMouseLeave={() => setHoverIdx(null)}
+          onTouchStart={handleTouchMove}
+          onTouchMove={handleTouchMove}
           onTouchEnd={() => setHoverIdx(null)}
         >
           {/* Horizontal Gann Degree Lines */}
@@ -94,7 +118,10 @@ export default function GannCandlestickChart({ activeItem, onSelectLevel }) {
               <g
                 key={lvl.id}
                 className="cursor-pointer"
-                onClick={() => !isUsed && onSelectLevel && onSelectLevel(lvl.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!isUsed && onSelectLevel) onSelectLevel(lvl.id);
+                }}
               >
                 <line
                   x1={padLeft}
@@ -150,7 +177,10 @@ export default function GannCandlestickChart({ activeItem, onSelectLevel }) {
               <g
                 key={c.openTime || idx}
                 onMouseEnter={() => setHoverIdx(idx)}
-                onTouchStart={() => setHoverIdx(idx)}
+                onTouchStart={(e) => {
+                  e.stopPropagation();
+                  setHoverIdx(idx);
+                }}
               >
                 {/* Wick */}
                 <line
