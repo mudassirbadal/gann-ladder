@@ -1,4 +1,4 @@
-import { Layers, BarChart2, Award, Bell, BookOpen } from 'lucide-react';
+import { Layers, BarChart2, Bell, BookOpen, Briefcase } from 'lucide-react';
 
 export default function MobileBottomNav({
   modalTab,
@@ -6,8 +6,10 @@ export default function MobileBottomNav({
   isModalOpen,
   setIsModalOpen,
   alertsCount,
+  openTradesCount = 0,
   onOpenAlerts,
-  onOpenRules
+  onOpenRules,
+  onOpenJournal
 }) {
   return (
     <nav className="fixed bottom-0 inset-x-0 z-40 sm:hidden bg-[#fcfaf5]/95 backdrop-blur-md border-t border-[#dfd7c5] px-1 py-1.5 shadow-lg">
@@ -44,20 +46,20 @@ export default function MobileBottomNav({
           <span className="text-[10px] mt-0.5 font-medium">Chart</span>
         </button>
 
-        {/* Win Rate Tab */}
+        {/* Journal Tab */}
         <button
-          onClick={() => {
-            setIsModalOpen(true);
-            setModalTab('analytics');
-          }}
-          className={`flex flex-col items-center justify-center p-1 rounded-xl min-w-[50px] transition active:scale-95 ${
-            isModalOpen && modalTab === 'analytics'
-              ? 'text-amber-800 font-bold bg-[#efe7d3]'
-              : 'text-stone-500 hover:text-stone-800'
-          }`}
+          onClick={onOpenJournal}
+          className="flex flex-col items-center justify-center p-1 rounded-xl min-w-[50px] text-stone-500 hover:text-stone-800 relative transition active:scale-95"
         >
-          <Award className="w-4 h-4" />
-          <span className="text-[10px] mt-0.5 font-medium">Win-Rate</span>
+          <Briefcase className="w-4 h-4 text-stone-700" />
+          <span className="text-[10px] mt-0.5 font-medium">Journal</span>
+          {openTradesCount > 0 && (
+            <span
+              className="absolute top-0.5 right-1 px-1 rounded-full text-[8px] font-bold bg-emerald-600 text-white font-mono"
+            >
+              {openTradesCount}
+            </span>
+          )}
         </button>
 
         {/* Rules Button */}

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { INITIAL_ASSETS } from './constants/assets';
 import { formatPrice, getISTTimeStr } from './utils/formatters';
 import { playAlertChime } from './utils/audio';
@@ -18,10 +18,13 @@ import ToastAlert from './components/ToastAlert';
 import MobileBottomNav from './components/MobileBottomNav';
 import GannModal from './components/Modal/GannModal';
 import TradingPlaybook from './components/TradingRules/TradingPlaybook';
+import ProximityRadar from './components/Radar/ProximityRadar';
 import AlertsDrawer from './components/Drawers/AlertsDrawer';
 import SettingsDrawer from './components/Drawers/SettingsDrawer';
 import PwaDrawer from './components/Drawers/PwaDrawer';
 import RulesDrawer from './components/Drawers/RulesDrawer';
+import TradingJournalDrawer from './components/Journal/TradingJournalDrawer';
+import { usePaperTrading } from './hooks/usePaperTrading';
 
 export default function App() {
   const [dataMode, setDataMode] = useState('reference');
@@ -188,6 +191,15 @@ export default function App() {
     },
     [soundEnabled, browserPushEnabled, telegramConfig]
   );
+
+  // Paper Trading Execution & Journal Engine
+  const paperTrading = usePaperTrading({
+    livePrices,
+    onTradeAlert: triggerNotification
+  });
+
+  // Proximity Radar automated warning
+  const lastProximityAlertRef = useRef({});
 
   // Auto-hide toast after 6s
   useEffect(() => {
@@ -391,6 +403,41 @@ export default function App() {
 
   const activeItem = computedLadders[selectedSymbol];
 
+  // Proximity Radar: Detect approaching R1/B1 within 0.22% and trigger early warning
+  useEffect(() => {
+    if (!activeItem || dataMode !== 'live') return;
+    const r1 = activeItem.ladder?.r1;
+    const b1 = activeItem.ladder?.b1;
+    const priceNow = activeItem.priceNow;
+    if (!priceNow) return;
+
+    const checkProximity = (lvl, type) => {
+      if (!lvl || !lvl.price) return;
+      const distPct = Math.abs((priceNow - lvl.price) / priceNow) * 100;
+      if (distPct <= 0.22) {
+        const key = `${activeItem.ticker}-${lvl.degree}-${type}`;
+        const lastAlert = lastProximityAlertRef.current[key] || 0;
+        const now = Date.now();
+        // Cooldown of 5 minutes per level alert
+        if (now - lastAlert > 5 * 60 * 1000) {
+          lastProximityAlertRef.current[key] = now;
+          triggerNotification({
+            symbol: activeItem.ticker,
+            type: type === 'rejection' ? 'rejection' : 'bounce',
+            title: `Radar Lock: Approaching ${type === 'rejection' ? 'R1 Resistance' : 'B1 Support'} (${lvl.degree}°)`,
+            levelPrice: lvl.price,
+            currentPrice: priceNow,
+            degree: `${lvl.degree}°`,
+            message: `Price is within ${distPct.toFixed(2)}% of the ${type === 'rejection' ? 'Rejection' : 'Bounce'} zone ($${formatPrice(lvl.price)}). Monitor for confluence!`
+          });
+        }
+      }
+    };
+
+    checkProximity(r1, 'rejection');
+    checkProximity(b1, 'bounce');
+  }, [activeItem, dataMode, triggerNotification]);
+
   return (
     <div
       className="min-h-screen w-full relative select-none sm:select-auto pb-20 sm:pb-16"
@@ -415,10 +462,12 @@ export default function App() {
         soundEnabled={soundEnabled}
         setSoundEnabled={setSoundEnabled}
         alertsCount={alertsLog.length}
+        openTradesCount={paperTrading.openTrades.length}
         onOpenAlerts={() => setActiveDrawer('alerts')}
         onOpenSettings={() => setActiveDrawer('settings')}
         onOpenPwa={() => setActiveDrawer('pwa')}
         onOpenRules={() => setActiveDrawer('rules')}
+        onOpenJournal={() => setActiveDrawer('journal')}
         onRefreshLive={fetchBinanceLiveMarket}
       />
 
@@ -427,6 +476,17 @@ export default function App() {
         selectedAsset={activeItem}
         onOpenModal={() => setIsModalOpen(true)}
       />
+
+      {/* Real-Time Gann Proximity Radar */}
+      <div className="max-w-5xl mx-auto px-3 sm:px-6 mb-3 sm:mb-4">
+        <ProximityRadar
+          activeItem={activeItem}
+          onOpenSetup={() => {
+            setIsModalOpen(true);
+            setModalTab('ladder');
+          }}
+        />
+      </div>
 
       {/* Touch-Friendly Asset Pills & Simulation Bar */}
       <AssetSelector
@@ -470,6 +530,9 @@ export default function App() {
         onResetPresets={handleResetPresets}
         onSimulateReaction={handleSimulateReaction}
         fetchKlinesByInterval={fetchKlinesByInterval}
+        onExecutePaperTrade={(setup, lvl) =>
+          paperTrading.executePaperTrade(setup, activeItem, lvl?.rank, lvl?.degree)
+        }
       />
 
       {/* Mobile Bottom Thumb Navigation */}
@@ -479,8 +542,10 @@ export default function App() {
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
         alertsCount={alertsLog.length}
+        openTradesCount={paperTrading.openTrades.length}
         onOpenAlerts={() => setActiveDrawer('alerts')}
         onOpenRules={() => setActiveDrawer('rules')}
+        onOpenJournal={() => setActiveDrawer('journal')}
       />
 
       {/* Drawers */}
@@ -513,6 +578,13 @@ export default function App() {
             message: 'Your Higher Probability Zones app is connected to Telegram!'
           })
         }
+      />
+
+      <TradingJournalDrawer
+        isOpen={activeDrawer === 'journal'}
+        onClose={() => setActiveDrawer(null)}
+        paperTrading={paperTrading}
+        livePrices={livePrices}
       />
 
       <PwaDrawer

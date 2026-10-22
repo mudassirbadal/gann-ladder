@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Copy, Check } from 'lucide-react';
+import { Copy, Check, Zap } from 'lucide-react';
 import { formatPrice } from '../../utils/formatters';
 
 export default function TradeSetupCalculator({
@@ -9,9 +9,11 @@ export default function TradeSetupCalculator({
   accountBalance,
   setAccountBalance,
   riskPerTradePct,
-  setRiskPerTradePct
+  setRiskPerTradePct,
+  onExecutePaperTrade
 }) {
   const [copied, setCopied] = useState(false);
+  const [tradeTaken, setTradeTaken] = useState(false);
 
   if (!tradeSetup) return null;
   const baseAsset = ticker.split('/')[0];
@@ -31,21 +33,47 @@ export default function TradeSetupCalculator({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleTakePaperTrade = (e) => {
+    e.stopPropagation();
+    if (onExecutePaperTrade) {
+      onExecutePaperTrade(tradeSetup, lvl);
+      setTradeTaken(true);
+      setTimeout(() => setTradeTaken(false), 3000);
+    }
+  };
+
   return (
     <div
       className="px-3 sm:px-3.5 pb-3.5 pt-2.5 border-t border-[#e6decb] bg-[#f7f3e8] space-y-2.5 text-xs font-mono"
     >
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-1.5 flex-wrap">
         <span className="font-bold text-[#8a6813] uppercase tracking-wider text-[11px]">
           Target Setup · {tradeSetup.direction}
         </span>
-        <button
-          onClick={handleCopySetup}
-          className="px-2.5 py-1 rounded-md bg-[#262420] text-[#fcfaf5] text-[10px] font-semibold flex items-center gap-1 hover:bg-stone-800 active:scale-95 transition"
-        >
-          {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-          <span>{copied ? 'Copied' : 'Copy Plan'}</span>
-        </button>
+        <div className="flex items-center gap-1.5">
+          {/* 1-Tap Paper Trade Button */}
+          <button
+            onClick={handleTakePaperTrade}
+            disabled={tradeTaken}
+            className={`px-2.5 py-1 rounded-md text-[10px] font-semibold flex items-center gap-1 active:scale-95 transition ${
+              tradeTaken
+                ? 'bg-emerald-700 text-white'
+                : 'bg-emerald-800 text-white hover:bg-emerald-900 shadow-xs'
+            }`}
+          >
+            {tradeTaken ? <Check className="w-3 h-3 text-white" /> : <Zap className="w-3 h-3 text-amber-300" />}
+            <span>{tradeTaken ? 'Paper Trade Active ✓' : 'Take Paper Trade'}</span>
+          </button>
+
+          {/* Copy Plan Button */}
+          <button
+            onClick={handleCopySetup}
+            className="px-2.5 py-1 rounded-md bg-[#262420] text-[#fcfaf5] text-[10px] font-semibold flex items-center gap-1 hover:bg-stone-800 active:scale-95 transition"
+          >
+            {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+            <span>{copied ? 'Copied' : 'Copy Plan'}</span>
+          </button>
+        </div>
       </div>
 
       {/* Entry, Stop-Loss, Take-Profit 1 & 2 */}

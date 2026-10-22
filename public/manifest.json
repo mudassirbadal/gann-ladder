@@ -1,0 +1,18 @@
+{
+  "name": "Gann Square of 9 Terminal",
+  "short_name": "Gann Zones",
+  "description": "High-Probability Gann Square of 9 Trading Terminal & Real-Time Rejection/Bounce Radar",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#fcfaf5",
+  "theme_color": "#262420",
+  "icons": [
+    {
+      "src": "/pwa-icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

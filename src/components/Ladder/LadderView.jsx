@@ -8,7 +8,8 @@ export default function LadderView({
   accountBalance,
   setAccountBalance,
   riskPerTradePct,
-  setRiskPerTradePct
+  setRiskPerTradePct,
+  onExecutePaperTrade
 }) {
   const r1 = activeItem.ladder.r1;
   const b1 = activeItem.ladder.b1;
@@ -186,6 +187,7 @@ export default function LadderView({
             setAccountBalance={setAccountBalance}
             riskPerTradePct={riskPerTradePct}
             setRiskPerTradePct={setRiskPerTradePct}
+            onExecutePaperTrade={onExecutePaperTrade}
           />
         ))}
       </div>
@@ -230,6 +232,7 @@ export default function LadderView({
             setAccountBalance={setAccountBalance}
             riskPerTradePct={riskPerTradePct}
             setRiskPerTradePct={setRiskPerTradePct}
+            onExecutePaperTrade={onExecutePaperTrade}
           />
         ))}
       </div>

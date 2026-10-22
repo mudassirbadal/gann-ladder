@@ -15,7 +15,8 @@ export default function LadderRow({
   accountBalance,
   setAccountBalance,
   riskPerTradePct,
-  setRiskPerTradePct
+  setRiskPerTradePct,
+  onExecutePaperTrade
 }) {
   const isUsed = lvl.rank === 'USED' || lvl.used;
   const isFinalRejection = lvl.rank === 'R1';
@@ -272,6 +273,7 @@ export default function LadderRow({
           setAccountBalance={setAccountBalance}
           riskPerTradePct={riskPerTradePct}
           setRiskPerTradePct={setRiskPerTradePct}
+          onExecutePaperTrade={onExecutePaperTrade}
         />
       )}
     </div>

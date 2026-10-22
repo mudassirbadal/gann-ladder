@@ -6,7 +6,8 @@ import {
   Smartphone,
   Radio,
   Wifi,
-  BookOpen
+  BookOpen,
+  Briefcase
 } from 'lucide-react';
 
 export default function Header({
@@ -16,10 +17,12 @@ export default function Header({
   soundEnabled,
   setSoundEnabled,
   alertsCount,
+  openTradesCount = 0,
   onOpenAlerts,
   onOpenSettings,
   onOpenPwa,
   onOpenRules,
+  onOpenJournal,
   onRefreshLive
 }) {
   return (
@@ -129,6 +132,22 @@ export default function Header({
           >
             <BookOpen className="w-3.5 h-3.5 text-amber-700" />
             <span className="hidden sm:inline">Rules</span>
+          </button>
+
+          {/* Paper Trading Journal Button */}
+          <button
+            onClick={onOpenJournal}
+            className="relative px-2 sm:px-3 py-1.5 rounded-lg bg-[#fcfaf5] border border-[#dcd4c4] text-stone-800 hover:bg-[#f4efe4] active:scale-95 transition flex items-center gap-1.5 text-xs font-medium"
+            title="Paper Trading Journal"
+            aria-label="Open trading journal"
+          >
+            <Briefcase className="w-3.5 h-3.5 text-stone-700" />
+            <span className="hidden sm:inline">Journal</span>
+            {openTradesCount > 0 && (
+              <span className="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-emerald-100 text-emerald-800 font-mono">
+                {openTradesCount}
+              </span>
+            )}
           </button>
 
           {/* Settings Button */}

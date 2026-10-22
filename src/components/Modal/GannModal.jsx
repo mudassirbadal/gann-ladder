@@ -28,7 +28,8 @@ export default function GannModal({
   setAssets,
   onResetPresets,
   onSimulateReaction,
-  fetchKlinesByInterval
+  fetchKlinesByInterval,
+  onExecutePaperTrade
 }) {
   if (!isOpen || !activeItem) return null;
 
@@ -91,6 +92,7 @@ export default function GannModal({
               setAccountBalance={setAccountBalance}
               riskPerTradePct={riskPerTradePct}
               setRiskPerTradePct={setRiskPerTradePct}
+              onExecutePaperTrade={onExecutePaperTrade}
             />
           )}
 
