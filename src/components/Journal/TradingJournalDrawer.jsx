@@ -1,13 +1,15 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Briefcase,
   X,
   TrendingUp,
   TrendingDown,
   Trash2,
-  PlayCircle
+  PlayCircle,
+  Filter
 } from 'lucide-react';
 import { formatPrice } from '../../utils/formatters';
+import CustomDropdown from '../Common/CustomDropdown';
 
 export default function TradingJournalDrawer({
   isOpen,
@@ -16,11 +18,48 @@ export default function TradingJournalDrawer({
   livePrices
 }) {
   const [tab, setTab] = useState('open'); // 'open' | 'history'
+  const [historyFilter, setHistoryFilter] = useState('ALL');
+
+  const { openTrades, closedTrades = [], closeTradeManually, clearJournalHistory, stats } =
+    paperTrading || {};
+
+  const filterOptions = useMemo(
+    () => [
+      {
+        value: 'ALL',
+        label: 'All Outcomes',
+        sublabel: `${closedTrades?.length || 0} recorded trades`,
+        badge: String(closedTrades?.length || 0),
+        badgeColor: 'bg-stone-100 text-stone-700',
+        icon: <Filter className="w-3.5 h-3.5 text-stone-600" />
+      },
+      {
+        value: 'WIN',
+        label: 'Wins Only',
+        sublabel: `${closedTrades?.filter((t) => t.status === 'WIN').length || 0} profitable trades`,
+        badge: 'TP Hit',
+        badgeColor: 'bg-emerald-100 text-emerald-800',
+        icon: <TrendingUp className="w-3.5 h-3.5 text-emerald-600" />
+      },
+      {
+        value: 'LOSS',
+        label: 'Losses Only',
+        sublabel: `${closedTrades?.filter((t) => t.status === 'LOSS').length || 0} stopped trades`,
+        badge: 'SL Hit',
+        badgeColor: 'bg-red-100 text-red-800',
+        icon: <TrendingDown className="w-3.5 h-3.5 text-red-600" />
+      }
+    ],
+    [closedTrades]
+  );
+
+  const displayedClosedTrades = useMemo(() => {
+    if (!closedTrades) return [];
+    if (historyFilter === 'ALL') return closedTrades;
+    return closedTrades.filter((t) => t.status === historyFilter);
+  }, [closedTrades, historyFilter]);
 
   if (!isOpen) return null;
-
-  const { openTrades, closedTrades, closeTradeManually, clearJournalHistory, stats } =
-    paperTrading;
 
   return (
     <div
@@ -218,12 +257,31 @@ export default function TradingJournalDrawer({
           {/* TAB 2: Trade History */}
           {tab === 'history' && (
             <div className="space-y-2">
-              {closedTrades.length === 0 ? (
+              {/* Filter Dropdown Bar */}
+              {closedTrades.length > 0 && (
+                <div className="flex items-center justify-between gap-2 p-1.5 rounded-xl bg-[#f4efe2] border border-[#e5decb]">
+                  <span className="text-[11px] font-mono text-stone-600 pl-1 font-semibold">
+                    Filter by Outcome:
+                  </span>
+                  <CustomDropdown
+                    value={historyFilter}
+                    onChange={setHistoryFilter}
+                    options={filterOptions}
+                    size="sm"
+                    align="right"
+                    buttonClassName="bg-white border-[#d8d0be]"
+                  />
+                </div>
+              )}
+
+              {displayedClosedTrades.length === 0 ? (
                 <div className="p-8 text-center rounded-2xl bg-white border border-[#e2dac9] text-xs text-stone-500">
-                  No completed trades yet. Once price hits your Take-Profit or Stop-Loss, the result will be recorded here.
+                  {closedTrades.length === 0
+                    ? 'No completed trades yet. Once price hits your Take-Profit or Stop-Loss, the result will be recorded here.'
+                    : 'No trades match the selected filter.'}
                 </div>
               ) : (
-                closedTrades.map((t) => {
+                displayedClosedTrades.map((t) => {
                   const isWin = t.status === 'WIN';
                   return (
                     <div

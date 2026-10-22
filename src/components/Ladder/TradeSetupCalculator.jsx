@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { Copy, Check, Zap } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Copy, Check, Zap, Shield, Award, Flame } from 'lucide-react';
 import { formatPrice } from '../../utils/formatters';
+import CustomDropdown from '../Common/CustomDropdown';
 
 export default function TradeSetupCalculator({
   lvl,
@@ -15,8 +16,46 @@ export default function TradeSetupCalculator({
   const [copied, setCopied] = useState(false);
   const [tradeTaken, setTradeTaken] = useState(false);
 
+  const riskOptions = useMemo(
+    () => [
+      {
+        value: 0.5,
+        label: '0.5%',
+        sublabel: 'Conservative · Capital Defense',
+        badge: 'Low',
+        badgeColor: 'bg-emerald-100 text-emerald-800',
+        icon: <Shield className="w-3.5 h-3.5 text-emerald-600" />
+      },
+      {
+        value: 1.0,
+        label: '1.0%',
+        sublabel: 'Standard · Recommended Gann Kelly',
+        badge: 'Optimal',
+        badgeColor: 'bg-amber-100 text-amber-800',
+        icon: <Award className="w-3.5 h-3.5 text-amber-600" />
+      },
+      {
+        value: 2.0,
+        label: '2.0%',
+        sublabel: 'Aggressive · High Conviction',
+        badge: 'Growth',
+        badgeColor: 'bg-orange-100 text-orange-800',
+        icon: <Zap className="w-3.5 h-3.5 text-orange-600" />
+      },
+      {
+        value: 3.0,
+        label: '3.0%',
+        sublabel: 'Max Risk · Tight Stop Pivots',
+        badge: 'Max',
+        badgeColor: 'bg-red-100 text-red-800',
+        icon: <Flame className="w-3.5 h-3.5 text-red-600" />
+      }
+    ],
+    []
+  );
+
   if (!tradeSetup) return null;
-  const baseAsset = ticker.split('/')[0];
+  const baseAsset = ticker ? ticker.split('/')[0] : '';
 
   const handleCopySetup = (e) => {
     e.stopPropagation();
@@ -126,18 +165,16 @@ export default function TradeSetupCalculator({
           />
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="text-stone-600 font-medium">Risk (%):</span>
-          <select
+        <div className="flex items-center gap-1.5">
+          <span className="text-stone-600 font-medium">Risk:</span>
+          <CustomDropdown
             value={riskPerTradePct}
-            onChange={(e) => setRiskPerTradePct(parseFloat(e.target.value) || 1.0)}
-            className="px-2 py-0.5 rounded border border-[#cfc5b0] bg-white font-bold text-stone-900 text-xs"
-          >
-            <option value={0.5}>0.5% (Conservative)</option>
-            <option value={1.0}>1.0% (Standard)</option>
-            <option value={2.0}>2.0% (Aggressive)</option>
-            <option value={3.0}>3.0% (Max)</option>
-          </select>
+            onChange={(val) => setRiskPerTradePct(val)}
+            options={riskOptions}
+            size="sm"
+            align="left"
+            buttonClassName="font-bold text-stone-900 bg-white"
+          />
         </div>
 
         <div className="text-right ml-auto">

@@ -1,4 +1,6 @@
-import { Sliders, X, Send } from 'lucide-react';
+import { useMemo } from 'react';
+import { Sliders, X, Send, Compass, Layers, RotateCw } from 'lucide-react';
+import CustomDropdown from '../Common/CustomDropdown';
 
 export default function SettingsDrawer({
   isOpen,
@@ -11,6 +13,36 @@ export default function SettingsDrawer({
   setTelegramConfig,
   onTestNotification
 }) {
+  const stepOptions = useMemo(
+    () => [
+      {
+        value: 45,
+        label: '45° · Fine Step',
+        sublabel: '1/8 Square of 9 · Best for scalp & 15m moves',
+        badge: 'Scalp',
+        badgeColor: 'bg-blue-100 text-blue-800',
+        icon: <Compass className="w-4 h-4 text-blue-600" />
+      },
+      {
+        value: 90,
+        label: '90° · Standard Step',
+        sublabel: '1/4 Gann Cycle · Cardinal cross levels',
+        badge: 'Default',
+        badgeColor: 'bg-amber-100 text-amber-800',
+        icon: <Layers className="w-4 h-4 text-amber-600" />
+      },
+      {
+        value: 180,
+        label: '180° · Major Step',
+        sublabel: 'Half Cycle · Major swing reversal zones',
+        badge: 'Macro',
+        badgeColor: 'bg-purple-100 text-purple-800',
+        icon: <RotateCw className="w-4 h-4 text-purple-600" />
+      }
+    ],
+    []
+  );
+
   if (!isOpen) return null;
 
   return (
@@ -148,25 +180,24 @@ export default function SettingsDrawer({
               <label className="block text-xs font-semibold text-stone-700 mb-1">
                 Step Size (Degrees)
               </label>
-              <select
+              <CustomDropdown
                 value={assets[selectedSymbol]?.stepDegrees || 90}
-                onChange={(e) => {
-                  const val = parseInt(e.target.value, 10);
+                onChange={(val) => {
                   setAssets((prev) => ({
                     ...prev,
                     [selectedSymbol]: {
                       ...prev[selectedSymbol],
-                      stepDegrees: val,
+                      stepDegrees: Number(val),
                       presetLevels: null
                     }
                   }));
                 }}
-                className="w-full px-3 py-2 rounded-lg border border-[#d8d0be] bg-white text-xs font-mono"
-              >
-                <option value={45}>45° (Fine / 1/8 Sq)</option>
-                <option value={90}>90° (Standard / 1/4 Cyc)</option>
-                <option value={180}>180° (Major Pivots)</option>
-              </select>
+                options={stepOptions}
+                size="md"
+                align="right"
+                className="w-full"
+                buttonClassName="w-full bg-white"
+              />
             </div>
           </div>
         </div>

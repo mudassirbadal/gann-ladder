@@ -1,5 +1,7 @@
+import { useMemo } from 'react';
 import { Anchor, X, Wifi, Layers, BarChart2, Award } from 'lucide-react';
 import { formatPrice } from '../../utils/formatters';
+import CustomDropdown from '../Common/CustomDropdown';
 
 export default function ModalHeader({
   activeItem,
@@ -14,7 +16,28 @@ export default function ModalHeader({
   setModalTab,
   onClose
 }) {
-  const assetsList = allAssets ? Object.values(allAssets) : [];
+  const assetsList = useMemo(() => (allAssets ? Object.values(allAssets) : []), [allAssets]);
+
+  const coinDropdownOptions = useMemo(() => {
+    return assetsList.map((coin) => {
+      const isUp = (coin.change24h || 0) >= 0;
+      return {
+        value: coin.id,
+        label: coin.name,
+        sublabel: `${coin.ticker} · $${formatPrice(coin.priceNow)}`,
+        badge: `${isUp ? '+' : ''}${coin.change24h ? coin.change24h.toFixed(2) : '0.00'}%`,
+        badgeColor: isUp ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800',
+        icon: (
+          <span
+            className="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold text-white shrink-0"
+            style={{ backgroundColor: coin.badgeColor }}
+          >
+            {coin.symbolBadge}
+          </span>
+        )
+      };
+    });
+  }, [assetsList]);
 
   return (
     <div className="shrink-0 border-b border-[#ece5d5]">
@@ -85,16 +108,26 @@ export default function ModalHeader({
           )}
 
           <div className="min-w-0">
-            <h2
-              className="text-xl sm:text-[28px] leading-tight text-[#1e1d1a] truncate"
-              style={{
-                fontFamily: "'Playfair Display', Georgia, serif",
-                fontStyle: 'italic',
-                fontWeight: 700
-              }}
-            >
-              {activeItem.name}
-            </h2>
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <h2
+                className="text-xl sm:text-[28px] leading-tight text-[#1e1d1a] truncate"
+                style={{
+                  fontFamily: "'Playfair Display', Georgia, serif",
+                  fontStyle: 'italic',
+                  fontWeight: 700
+                }}
+              >
+                {activeItem.name}
+              </h2>
+              <CustomDropdown
+                value={activeItem.id}
+                onChange={(id) => onSelectSymbol && onSelectSymbol(id)}
+                options={coinDropdownOptions}
+                size="sm"
+                align="left"
+                buttonClassName="bg-[#f4efe2] border-[#dcd3bf] hover:bg-white text-[10px] sm:text-xs py-0.5 px-2 font-mono shrink-0"
+              />
+            </div>
             <div className="flex flex-wrap items-center gap-1 sm:gap-1.5 mt-0.5 font-mono">
               <span className="text-[11px] sm:text-xs text-[#7c776b] font-medium">
                 {activeItem.ticker.split('/')[0]}

@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { formatPrice } from '../../utils/formatters';
 import { generatePresetCandles } from '../../utils/gannMath';
+import CustomDropdown from '../Common/CustomDropdown';
 
 const TIMEFRAMES = [
   { id: '1m', label: '1m' },
@@ -19,6 +20,51 @@ const TIMEFRAMES = [
   { id: '15m', label: '15m' },
   { id: '1h', label: '1h' },
   { id: '4h', label: '4h' }
+];
+
+const TIMEFRAME_OPTIONS = [
+  {
+    value: '1m',
+    label: '1m Candle',
+    sublabel: 'Ultra-fast momentum & scalp reactions',
+    badge: 'Micro',
+    badgeColor: 'bg-stone-200 text-stone-800'
+  },
+  {
+    value: '3m',
+    label: '3m Candle',
+    sublabel: 'Intraday execution & entry trigger',
+    badge: 'Fast',
+    badgeColor: 'bg-blue-100 text-blue-800'
+  },
+  {
+    value: '5m',
+    label: '5m Candle',
+    sublabel: 'Short-term price action & retests',
+    badge: 'Scalp',
+    badgeColor: 'bg-cyan-100 text-cyan-800'
+  },
+  {
+    value: '15m',
+    label: '15m Candle',
+    sublabel: 'Core Gann confluence (RSI + Wick analysis)',
+    badge: 'Core',
+    badgeColor: 'bg-emerald-100 text-emerald-800'
+  },
+  {
+    value: '1h',
+    label: '1h Candle',
+    sublabel: 'Intermediate structural pivot confirmations',
+    badge: 'Swing',
+    badgeColor: 'bg-amber-100 text-amber-800'
+  },
+  {
+    value: '4h',
+    label: '4h Candle',
+    sublabel: 'Primary Gann Anchor & Cardinal Cycle',
+    badge: 'Macro',
+    badgeColor: 'bg-purple-100 text-purple-800'
+  }
 ];
 
 export default function GannCandlestickChart({
@@ -231,13 +277,26 @@ export default function GannCandlestickChart({
       {/* Timeframe & Zoom Control Toolbar */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-1.5 p-1.5 rounded-xl bg-[#ede7d8] border border-[#d8d0be]">
         {/* Interval Selector */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5 flex-1 min-w-0">
           <div className="flex items-center gap-1 text-[10px] text-stone-600 font-mono pl-1 shrink-0">
             <Clock className="w-3 h-3 text-amber-700" />
-            <span className="font-bold">Interval:</span>
+            <span className="font-bold hidden sm:inline">Interval:</span>
           </div>
 
-          <div className="grid grid-cols-6 gap-1 flex-1 sm:max-w-[280px]">
+          {/* Mobile Interval Dropdown */}
+          <div className="sm:hidden flex-1">
+            <CustomDropdown
+              value={selectedTf}
+              onChange={setSelectedTf}
+              options={TIMEFRAME_OPTIONS}
+              size="sm"
+              className="w-full"
+              buttonClassName="bg-white/80 border-[#cfc5b0] font-bold text-xs w-full"
+            />
+          </div>
+
+          {/* Desktop/Tablet 6-Pill Switcher */}
+          <div className="hidden sm:grid grid-cols-6 gap-1 flex-1 sm:max-w-[280px]">
             {TIMEFRAMES.map((tf) => {
               const isActive = selectedTf === tf.id;
               return (
