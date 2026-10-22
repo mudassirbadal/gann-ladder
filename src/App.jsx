@@ -36,7 +36,7 @@ export default function App() {
   const [expandedRowId, setExpandedRowId] = useState(null);
 
   // Global Risk & Position Sizing Account Settings
-  const [accountBalance, setAccountBalance] = useState(10000);
+  const [accountBalance, setAccountBalance] = useState(300);
   const [riskPerTradePct, setRiskPerTradePct] = useState(1.0);
 
   // Inline Custom Anchor Popover
@@ -452,6 +452,21 @@ export default function App() {
     checkProximity(b1, 'bounce');
   }, [activeItem, dataMode, triggerNotification]);
 
+  // Paper Trading Automated Execution Engine
+  // Evaluates zone proximity/touch & confirmation wicks across assets
+  useEffect(() => {
+    if (!paperTrading.autoTradingEnabled) return;
+
+    Object.values(computedLadders).forEach((item) => {
+      if (!item || !item.priceNow || !item.ladder) return;
+      const signal = getConfluenceSignal(item);
+      paperTrading.evaluateAndTriggerAutoTrade({
+        activeItem: item,
+        confluenceSignal: signal
+      });
+    });
+  }, [computedLadders, paperTrading.autoTradingEnabled, getConfluenceSignal, paperTrading.evaluateAndTriggerAutoTrade]);
+
   return (
     <div
       className="min-h-screen w-full relative select-none sm:select-auto pb-20 sm:pb-16"
@@ -477,6 +492,7 @@ export default function App() {
         setSoundEnabled={setSoundEnabled}
         alertsCount={alertsLog.length}
         openTradesCount={paperTrading.openTrades.length}
+        autoTradingEnabled={paperTrading.autoTradingEnabled}
         onOpenAlerts={() => setActiveDrawer('alerts')}
         onOpenSettings={() => setActiveDrawer('settings')}
         onOpenPwa={() => setActiveDrawer('pwa')}
@@ -561,6 +577,7 @@ export default function App() {
         setIsModalOpen={setIsModalOpen}
         alertsCount={alertsLog.length}
         openTradesCount={paperTrading.openTrades.length}
+        autoTradingEnabled={paperTrading.autoTradingEnabled}
         onOpenAlerts={() => setActiveDrawer('alerts')}
         onOpenRules={() => setActiveDrawer('rules')}
         onOpenJournal={() => setActiveDrawer('journal')}

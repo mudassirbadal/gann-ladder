@@ -183,12 +183,22 @@ export default function TradeSetupCalculator({
         </div>
 
         <div className="text-right ml-auto">
-          <span className="text-[10px] text-stone-500">Position Size: </span>
-          <span className="font-bold text-stone-900">
-            {tradeSetup.positionUnits.toFixed(4)} {baseAsset}
-          </span>
-          <span className="text-stone-500 text-[10px] block">
-            (${formatPrice(tradeSetup.notionalUsd, 0)} notional · ${formatPrice(tradeSetup.riskDollars, 0)} risk)
+          <div className="flex items-center gap-1.5 justify-end">
+            <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-bold border border-amber-200">
+              1:1000 Lev
+            </span>
+            <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold border border-emerald-200">
+              1:2 R:R
+            </span>
+          </div>
+          <div className="mt-0.5">
+            <span className="text-[10px] text-stone-500">Size: </span>
+            <span className="font-bold text-stone-900">
+              {tradeSetup.positionUnits.toFixed(4)} {baseAsset}
+            </span>
+          </div>
+          <span className="text-stone-500 text-[9.5px] block">
+            Margin: ${formatPrice(tradeSetup.marginRequired || (tradeSetup.notionalUsd / 1000))} · Risk: ${formatPrice(tradeSetup.riskDollars || tradeSetup.maxRiskDollar)}
           </span>
         </div>
       </div>

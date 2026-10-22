@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { formatPrice } from '../../utils/formatters';
 import { isGoldHighlightDegree } from '../../utils/gannMath';
+import { calculatePreciseTradeSetup } from '../../utils/tradeRules';
 import TradeSetupCalculator from './TradeSetupCalculator';
 
 export default function LadderRow({
@@ -42,62 +43,19 @@ export default function LadderRow({
 
   const goldDegreeText = isGoldHighlightDegree(lvl.degree);
 
-  // Compute trade setup
+  // Compute trade setup adhering to strict 1:2 R:R, Gold 15pt / $15 max SL, Crypto $10 max SL, 1:1000 leverage
   const tradeSetup = useMemo(() => {
     if (isUsed) return null;
-    const entry = lvl.price;
     const isShort = isRejectionRank;
-
-    const allAboveAsc = [...(ladder?.above || [])]
-      .filter((x) => !x.used && x.price > entry)
-      .sort((a, b) => a.price - b.price);
-    const allBelowDesc = [...(ladder?.below || [])]
-      .filter((x) => !x.used && x.price < entry)
-      .sort((a, b) => b.price - a.price);
-
-    let stopLoss;
-    let takeProfit1;
-    let takeProfit2;
-
-    if (isShort) {
-      const nextHigher = allAboveAsc[0];
-      stopLoss = nextHigher ? nextHigher.price * 1.0015 : entry * 1.0085;
-      takeProfit1 = ladder?.b1 ? ladder.b1.price : entry * 0.982;
-      const b2 = (ladder?.below || []).find((x) => x.rank === 'B2');
-      takeProfit2 = b2 ? b2.price : takeProfit1 * 0.992;
-    } else {
-      const nextLower = allBelowDesc[0];
-      stopLoss = nextLower ? nextLower.price * 0.9985 : entry * 0.9915;
-      takeProfit1 = ladder?.r1 ? ladder.r1.price : entry * 1.018;
-      const r2 = (ladder?.above || []).find((x) => x.rank === 'R2');
-      takeProfit2 = r2 ? r2.price : takeProfit1 * 1.008;
-    }
-
-    const slDistanceDollar = Math.abs(entry - stopLoss);
-    const slDistancePct = (slDistanceDollar / entry) * 100;
-    const tp1DistanceDollar = Math.abs(takeProfit1 - entry);
-    const tp1DistancePct = (tp1DistanceDollar / entry) * 100;
-    const rrRatio = slDistanceDollar > 0 ? tp1DistanceDollar / slDistanceDollar : 2.0;
-
-    const riskDollars = (accountBalance * riskPerTradePct) / 100;
-    const positionUnits = slDistanceDollar > 0 ? riskDollars / slDistanceDollar : 0;
-    const notionalUsd = positionUnits * entry;
-
-    return {
-      direction: isShort ? 'SHORT (Rejection)' : 'LONG (Bounce)',
+    return calculatePreciseTradeSetup({
+      lvl,
       isShort,
-      entry,
-      stopLoss,
-      takeProfit1,
-      takeProfit2,
-      slDistancePct,
-      tp1DistancePct,
-      rrRatio,
-      riskDollars,
-      positionUnits,
-      notionalUsd
-    };
-  }, [isUsed, lvl.price, isRejectionRank, ladder, accountBalance, riskPerTradePct]);
+      ticker,
+      currentPrice: priceNow,
+      accountBalance,
+      leverage: 1000
+    });
+  }, [isUsed, lvl, isRejectionRank, ticker, priceNow, accountBalance]);
 
   return (
     <div

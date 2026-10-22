@@ -18,6 +18,7 @@ export default function Header({
   setSoundEnabled,
   alertsCount,
   openTradesCount = 0,
+  autoTradingEnabled = false,
   onOpenAlerts,
   onOpenSettings,
   onOpenPwa,
@@ -138,11 +139,17 @@ export default function Header({
           <button
             onClick={onOpenJournal}
             className="relative px-2 sm:px-3 py-1.5 rounded-lg bg-[#fcfaf5] border border-[#dcd4c4] text-stone-800 hover:bg-[#f4efe4] active:scale-95 transition flex items-center gap-1.5 text-xs font-medium"
-            title="Paper Trading Journal"
+            title="Paper Trading Journal & Auto-Bot"
             aria-label="Open trading journal"
           >
             <Briefcase className="w-3.5 h-3.5 text-stone-700" />
             <span className="hidden sm:inline">Journal</span>
+            {autoTradingEnabled && (
+              <span className="px-1 py-0.2 rounded text-[8px] font-bold bg-amber-100 text-amber-900 border border-amber-300 font-mono flex items-center gap-0.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                BOT
+              </span>
+            )}
             {openTradesCount > 0 && (
               <span className="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-emerald-100 text-emerald-800 font-mono">
                 {openTradesCount}
