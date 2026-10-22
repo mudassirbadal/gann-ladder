@@ -43,10 +43,11 @@ export default function ModalHeader({
     <div className="shrink-0 border-b border-[#ece5d5]">
       {/* Quick 5-Coin Switcher Row directly inside modal header */}
       {assetsList.length > 0 && (
-        <div className="px-3 sm:px-5 pt-2.5 pb-2 bg-[#f4efe2] border-b border-[#e5decb]">
+        <div className="px-3 sm:px-5 pt-2 pb-1.5 bg-[#f4efe2] border-b border-[#e5decb]">
           <div className="grid grid-cols-5 gap-1 sm:gap-1.5">
             {assetsList.map((coin) => {
               const isCurrent = activeItem.id === coin.id;
+              const shortLabel = coin.id.includes('PAXG') || coin.id.includes('XAU') ? 'Gold' : coin.ticker.split('/')[0];
               return (
                 <button
                   key={coin.id}
@@ -64,7 +65,10 @@ export default function ModalHeader({
                   >
                     {coin.symbolBadge}
                   </span>
-                  <span className="truncate">{coin.name}</span>
+                  <span className="truncate">
+                    <span className="sm:hidden">{shortLabel}</span>
+                    <span className="hidden sm:inline">{coin.name}</span>
+                  </span>
                 </button>
               );
             })}
@@ -73,33 +77,33 @@ export default function ModalHeader({
       )}
 
       {/* Main Asset Header: Emblem, Title, Price, Close */}
-      <div className="px-3.5 sm:px-5 pt-3 pb-2.5 flex items-start justify-between gap-2">
-        <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
+      <div className="px-3.5 sm:px-5 pt-3 pb-2.5 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1">
           {/* Asset Emblem */}
           {activeItem.id === 'PAXGUSDT' ? (
             <div
-              className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shrink-0"
+              className="w-9 h-9 sm:w-11 sm:h-11 rounded-full flex items-center justify-center shrink-0 shadow-xs"
               style={{
                 backgroundColor: '#faf5e6',
                 border: '1.5px solid #d4b257',
                 color: '#9e7b1c',
                 fontFamily: "'JetBrains Mono', monospace",
                 fontWeight: 600,
-                fontSize: '16px'
+                fontSize: '15px'
               }}
             >
               Au
             </div>
           ) : (
             <div
-              className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shrink-0 shadow-sm p-1"
+              className="w-9 h-9 sm:w-11 sm:h-11 rounded-full flex items-center justify-center shrink-0 shadow-xs p-0.5"
               style={{
                 backgroundColor: '#fdfaf2',
                 border: '1.5px solid #e6dec8'
               }}
             >
               <div
-                className="w-full h-full rounded-full flex items-center justify-center text-white font-bold text-lg sm:text-xl"
+                className="w-full h-full rounded-full flex items-center justify-center text-white font-bold text-base sm:text-lg"
                 style={{ backgroundColor: activeItem.badgeColor }}
               >
                 {activeItem.symbolBadge}
@@ -107,10 +111,10 @@ export default function ModalHeader({
             </div>
           )}
 
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5 sm:gap-2">
               <h2
-                className="text-xl sm:text-[28px] leading-tight text-[#1e1d1a] truncate"
+                className="text-lg sm:text-[24px] leading-tight text-[#1e1d1a] truncate"
                 style={{
                   fontFamily: "'Playfair Display', Georgia, serif",
                   fontStyle: 'italic',
@@ -119,14 +123,17 @@ export default function ModalHeader({
               >
                 {activeItem.name}
               </h2>
-              <CustomDropdown
-                value={activeItem.id}
-                onChange={(id) => onSelectSymbol && onSelectSymbol(id)}
-                options={coinDropdownOptions}
-                size="sm"
-                align="left"
-                buttonClassName="bg-[#f4efe2] border-[#dcd3bf] hover:bg-white text-[10px] sm:text-xs py-0.5 px-2 font-mono shrink-0"
-              />
+              {/* Desktop-only dropdown option, keeping mobile view 100% clean and non-overlapping */}
+              <div className="hidden md:inline-block">
+                <CustomDropdown
+                  value={activeItem.id}
+                  onChange={(id) => onSelectSymbol && onSelectSymbol(id)}
+                  options={coinDropdownOptions}
+                  size="sm"
+                  align="left"
+                  buttonClassName="bg-[#f4efe2] border-[#dcd3bf] hover:bg-white text-[10px] sm:text-xs py-0.5 px-2 font-mono shrink-0"
+                />
+              </div>
             </div>
             <div className="flex flex-wrap items-center gap-1 sm:gap-1.5 mt-0.5 font-mono">
               <span className="text-[11px] sm:text-xs text-[#7c776b] font-medium">
@@ -163,10 +170,10 @@ export default function ModalHeader({
         </div>
 
         {/* Right Price + 24h Pill + Close X */}
-        <div className="flex items-start gap-2 sm:gap-3 shrink-0">
-          <div className="text-right">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0 text-right z-10 pl-1">
+          <div className="text-right flex flex-col items-end shrink-0">
             <div
-              className="text-lg sm:text-[20px] font-bold tracking-tight transition-colors duration-300 px-1 rounded font-mono"
+              className="text-base sm:text-[20px] font-bold tracking-tight transition-colors duration-300 px-1 rounded font-mono whitespace-nowrap"
               style={{
                 color:
                   priceTickFlash[activeItem.id] === 'up'
@@ -184,10 +191,10 @@ export default function ModalHeader({
             >
               ${formatPrice(activeItem.priceNow)}
             </div>
-            <div className="mt-0.5 sm:mt-1 flex justify-end items-center gap-1 sm:gap-1.5">
+            <div className="mt-0.5 flex justify-end items-center gap-1 shrink-0">
               {dataMode === 'live' && wsConnected && (
                 <span
-                  className="inline-flex items-center gap-0.5 text-[8px] sm:text-[9px] px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 font-mono font-bold"
+                  className="inline-flex items-center gap-0.5 text-[8px] sm:text-[9px] px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 font-mono font-bold shrink-0"
                   title="Sub-second Binance WebSocket Stream Active"
                 >
                   <Wifi className="w-2 h-2 sm:w-2.5 sm:h-2.5" />
@@ -195,7 +202,7 @@ export default function ModalHeader({
                 </span>
               )}
               <span
-                className="inline-flex items-center gap-0.5 text-[10px] sm:text-[11px] font-semibold px-2 py-0.2 rounded-full font-mono"
+                className="inline-flex items-center gap-0.5 text-[10px] sm:text-[11px] font-semibold px-2 py-0.2 rounded-full font-mono shrink-0 whitespace-nowrap"
                 style={{
                   backgroundColor: activeItem.change24h < 0 ? '#faeceb' : '#e5f5ec',
                   border:
@@ -213,7 +220,7 @@ export default function ModalHeader({
 
           <button
             onClick={onClose}
-            className="text-[#8c8577] hover:text-[#1e1d1a] p-1.5 -mr-1 rounded-lg hover:bg-[#efe9dc] transition"
+            className="text-[#8c8577] hover:text-[#1e1d1a] p-1.5 -mr-1 rounded-lg hover:bg-[#efe9dc] transition shrink-0"
             aria-label="Close modal"
           >
             <X className="w-5 h-5" />

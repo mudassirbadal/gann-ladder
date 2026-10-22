@@ -7,7 +7,8 @@ import {
   Radio,
   Wifi,
   BookOpen,
-  Briefcase
+  Briefcase,
+  Menu
 } from 'lucide-react';
 
 export default function Header({
@@ -24,6 +25,7 @@ export default function Header({
   onOpenPwa,
   onOpenRules,
   onOpenJournal,
+  onOpenMenu,
   onRefreshLive
 }) {
   return (
@@ -92,11 +94,11 @@ export default function Header({
             </button>
           </div>
 
-          {/* Sound Toggle */}
+          {/* Sound Toggle (Desktop) */}
           <button
             onClick={() => setSoundEnabled(!soundEnabled)}
             title="Toggle Alert Chime"
-            className="p-1.5 sm:p-2 rounded-lg bg-[#fcfaf5] border border-[#dcd4c4] text-stone-700 hover:bg-[#f4efe4] active:scale-95 transition"
+            className="hidden sm:flex p-1.5 sm:p-2 rounded-lg bg-[#fcfaf5] border border-[#dcd4c4] text-stone-700 hover:bg-[#f4efe4] active:scale-95 transition"
             aria-label="Toggle alert chime"
           >
             {soundEnabled ? (
@@ -124,17 +126,6 @@ export default function Header({
             )}
           </button>
 
-          {/* Trading Rules Button */}
-          <button
-            onClick={onOpenRules}
-            className="px-2 sm:px-3 py-1.5 rounded-lg bg-[#fcfaf5] border border-[#dcd4c4] text-stone-800 hover:bg-[#f4efe4] active:scale-95 transition flex items-center gap-1.5 text-xs font-medium"
-            title="Gann Trading Rules & Playbook"
-            aria-label="Open trading rules"
-          >
-            <BookOpen className="w-3.5 h-3.5 text-amber-700" />
-            <span className="hidden sm:inline">Rules</span>
-          </button>
-
           {/* Paper Trading Journal Button */}
           <button
             onClick={onOpenJournal}
@@ -157,10 +148,21 @@ export default function Header({
             )}
           </button>
 
-          {/* Settings Button */}
+          {/* Trading Rules Button (Desktop) */}
+          <button
+            onClick={onOpenRules}
+            className="hidden sm:flex px-2 sm:px-3 py-1.5 rounded-lg bg-[#fcfaf5] border border-[#dcd4c4] text-stone-800 hover:bg-[#f4efe4] active:scale-95 transition items-center gap-1.5 text-xs font-medium"
+            title="Gann Trading Rules & Playbook"
+            aria-label="Open trading rules"
+          >
+            <BookOpen className="w-3.5 h-3.5 text-amber-700" />
+            <span>Rules</span>
+          </button>
+
+          {/* Settings Button (Desktop) */}
           <button
             onClick={onOpenSettings}
-            className="p-1.5 sm:px-3 sm:py-1.5 rounded-lg bg-[#fcfaf5] border border-[#dcd4c4] text-stone-800 hover:bg-[#f4efe4] active:scale-95 transition flex items-center gap-1.5 text-xs font-medium"
+            className="hidden sm:flex p-1.5 sm:px-3 sm:py-1.5 rounded-lg bg-[#fcfaf5] border border-[#dcd4c4] text-stone-800 hover:bg-[#f4efe4] active:scale-95 transition items-center gap-1.5 text-xs font-medium"
             title="Settings & Telegram"
             aria-label="Open settings"
           >
@@ -168,7 +170,7 @@ export default function Header({
             <span className="hidden md:inline">Settings</span>
           </button>
 
-          {/* PWA Android Guide Button */}
+          {/* PWA Android Guide Button (Desktop) */}
           <button
             onClick={onOpenPwa}
             className="hidden sm:flex px-2.5 py-1.5 rounded-lg bg-[#2b2925] text-[#fcfaf5] hover:bg-stone-800 active:scale-95 transition items-center gap-1.5 text-xs font-medium shadow-sm"
@@ -176,6 +178,16 @@ export default function Header({
           >
             <Smartphone className="w-3.5 h-3.5 text-amber-400" />
             <span>Install App</span>
+          </button>
+
+          {/* Mobile Hamburger Menu Button */}
+          <button
+            onClick={onOpenMenu}
+            className="sm:hidden p-1.5 rounded-lg bg-[#2b2925] text-amber-400 hover:bg-stone-800 active:scale-95 transition flex items-center justify-center shadow-xs"
+            title="Open Mobile Navigation Menu"
+            aria-label="Open navigation menu"
+          >
+            <Menu className="w-4 h-4" />
           </button>
         </div>
       </div>

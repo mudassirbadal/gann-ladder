@@ -23,6 +23,7 @@ import AlertsDrawer from './components/Drawers/AlertsDrawer';
 import SettingsDrawer from './components/Drawers/SettingsDrawer';
 import PwaDrawer from './components/Drawers/PwaDrawer';
 import RulesDrawer from './components/Drawers/RulesDrawer';
+import MobileMenuDrawer from './components/Drawers/MobileMenuDrawer';
 import TradingJournalDrawer from './components/Journal/TradingJournalDrawer';
 import { usePaperTrading } from './hooks/usePaperTrading';
 import { useAstroEngine } from './hooks/useAstroEngine';
@@ -498,6 +499,7 @@ export default function App() {
         onOpenPwa={() => setActiveDrawer('pwa')}
         onOpenRules={() => setActiveDrawer('rules')}
         onOpenJournal={() => setActiveDrawer('journal')}
+        onOpenMenu={() => setActiveDrawer('menu')}
         onRefreshLive={fetchBinanceLiveMarket}
       />
 
@@ -581,9 +583,28 @@ export default function App() {
         onOpenAlerts={() => setActiveDrawer('alerts')}
         onOpenRules={() => setActiveDrawer('rules')}
         onOpenJournal={() => setActiveDrawer('journal')}
+        onOpenMenu={() => setActiveDrawer('menu')}
       />
 
       {/* Drawers */}
+      <MobileMenuDrawer
+        isOpen={activeDrawer === 'menu'}
+        onClose={() => setActiveDrawer(null)}
+        dataMode={dataMode}
+        setDataMode={setDataMode}
+        soundEnabled={soundEnabled}
+        setSoundEnabled={setSoundEnabled}
+        paperTrading={paperTrading}
+        onOpenJournal={() => setActiveDrawer('journal')}
+        onOpenRules={() => setActiveDrawer('rules')}
+        onOpenAlerts={() => setActiveDrawer('alerts')}
+        onOpenSettings={() => setActiveDrawer('settings')}
+        onOpenPwa={() => setActiveDrawer('pwa')}
+        alertsCount={alertsLog.length}
+        onSimulateReaction={handleSimulateReaction}
+        onResetPresets={handleResetPresets}
+        astroState={astroState}
+      />
       <AlertsDrawer
         isOpen={activeDrawer === 'alerts'}
         onClose={() => setActiveDrawer(null)}

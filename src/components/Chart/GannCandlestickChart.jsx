@@ -277,27 +277,14 @@ export default function GannCandlestickChart({
     >
       {/* Timeframe & Zoom Control Toolbar */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-1.5 p-1.5 rounded-xl bg-[#ede7d8] border border-[#d8d0be]">
-        {/* Interval Selector */}
+        {/* Interval Selector (1-Tap 6-Pill Switcher for Mobile & Desktop) */}
         <div className="flex items-center gap-1.5 flex-1 min-w-0">
           <div className="flex items-center gap-1 text-[10px] text-stone-600 font-mono pl-1 shrink-0">
             <Clock className="w-3 h-3 text-amber-700" />
-            <span className="font-bold hidden sm:inline">Interval:</span>
+            <span className="font-bold hidden xs:inline">TF:</span>
           </div>
 
-          {/* Mobile Interval Dropdown */}
-          <div className="sm:hidden flex-1">
-            <CustomDropdown
-              value={selectedTf}
-              onChange={setSelectedTf}
-              options={TIMEFRAME_OPTIONS}
-              size="sm"
-              className="w-full"
-              buttonClassName="bg-white/80 border-[#cfc5b0] font-bold text-xs w-full"
-            />
-          </div>
-
-          {/* Desktop/Tablet 6-Pill Switcher */}
-          <div className="hidden sm:grid grid-cols-6 gap-1 flex-1 sm:max-w-[280px]">
+          <div className="grid grid-cols-6 gap-0.5 sm:gap-1 flex-1 sm:max-w-[280px]">
             {TIMEFRAMES.map((tf) => {
               const isActive = selectedTf === tf.id;
               return (
@@ -309,9 +296,10 @@ export default function GannCandlestickChart({
                   }}
                   className={`py-1 text-center rounded-lg text-[10px] sm:text-[11px] font-mono font-bold transition-all active:scale-95 ${
                     isActive
-                      ? 'bg-[#262420] text-[#fcfaf5] shadow-xs'
-                      : 'text-stone-700 hover:bg-[#ded6c3] bg-white/50'
+                      ? 'bg-[#262420] text-[#fcfaf5] shadow-xs ring-1 ring-[#c59416]'
+                      : 'text-stone-700 hover:bg-[#ded6c3] bg-white/60 border border-[#d8d0be]'
                   }`}
+                  title={`${tf.label} Candle Timeframe`}
                 >
                   {tf.label}
                 </button>
