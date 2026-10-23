@@ -14,6 +14,8 @@ import { useBinanceMarket } from './hooks/useBinanceMarket';
 import Header from './components/Header';
 import HeroSection from './components/HeroSection';
 import AssetSelector from './components/AssetSelector';
+// Preserved for rollback if needed (paused per user request):
+// eslint-disable-next-line no-unused-vars
 import ToastAlert from './components/ToastAlert';
 import MobileBottomNav from './components/MobileBottomNav';
 import GannModal from './components/Modal/GannModal';
@@ -161,18 +163,47 @@ export default function App() {
       };
 
       setAlertsLog((prev) => [newAlert, ...prev.slice(0, 49)]);
-      setActiveToast(newAlert);
+      // Legacy ToastAlert paused per user request (code preserved in place):
+      // setActiveToast(newAlert);
 
-      // In-App Sileo Physics Toast Notification
+      // In-App Sileo Physics Toast Notification (Ultra-Premium Terminal Styling)
+      const isRejection = type === 'rejection';
+      const isBounce = type === 'bounce';
+
       const toastPayload = {
-        title: `${symbol}: ${title}`,
-        description: `${message} · Price: $${formatPrice(currentPrice)}`,
-        duration: 4500,
+        title: `${symbol} — ${title}`,
+        description: (
+          <div className="space-y-1.5 pt-0.5">
+            <div className="text-[12px] text-stone-700 leading-snug font-medium">
+              {message}
+            </div>
+            <div className="flex items-center justify-between gap-2 pt-1.5 border-t border-stone-200/70 font-mono text-[11px]">
+              <span className="font-bold text-stone-900">
+                Price: ${formatPrice(currentPrice)}
+              </span>
+              {degree !== undefined && (
+                <span
+                  className={`px-1.5 py-0.5 rounded font-black text-[9.5px] uppercase ${
+                    isRejection
+                      ? 'bg-rose-100 text-rose-800 border border-rose-300'
+                      : isBounce
+                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                      : 'bg-amber-100 text-amber-800 border border-amber-300'
+                  }`}
+                >
+                  {degree}° Gann Zone
+                </span>
+              )}
+            </div>
+          </div>
+        ),
+        duration: 5000,
         position: 'top-right'
       };
-      if (type === 'rejection') {
+
+      if (isRejection) {
         sileo.error(toastPayload);
-      } else if (type === 'bounce') {
+      } else if (isBounce) {
         sileo.success(toastPayload);
       } else {
         sileo.info(toastPayload);
@@ -538,14 +569,23 @@ export default function App() {
         fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
       }}
     >
-      {/* Sileo Physics In-App Toaster */}
-      <Toaster position="top-right" theme="light" />
+      {/* Sileo Physics In-App Toaster with Premium Terminal Positioning */}
+      <Toaster
+        position="top-right"
+        theme="light"
+        offset={{ top: 72, right: 16 }}
+        options={{
+          roundness: 16,
+          duration: 5000,
+          autopilot: true
+        }}
+      />
 
-      {/* Floating Live Notification Toast */}
-      <ToastAlert
+      {/* Previous Floating Live Notification Toast - Paused per user request, code preserved in place */}
+      {/* <ToastAlert
         alert={activeToast}
         onClose={() => setActiveToast(null)}
-      />
+      /> */}
 
       {/* Top Header & Mode Controls */}
       <Header
