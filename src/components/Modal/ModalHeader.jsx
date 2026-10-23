@@ -10,6 +10,7 @@ export default function ModalHeader({
   dataMode,
   wsConnected,
   priceTickFlash,
+  xmFeedActive,
   showAnchorPopover,
   setShowAnchorPopover,
   modalTab,
@@ -144,6 +145,12 @@ export default function ModalHeader({
               {activeItem.isPerp && (
                 <span className="text-[9px] sm:text-[10px] px-1.5 py-0.2 rounded font-semibold bg-[#fcf6e4] border border-[#d9be6c] text-[#997411]">
                   PERP
+                </span>
+              )}
+
+              {activeItem.id === 'PAXGUSDT' && xmFeedActive && (
+                <span className="text-[9px] sm:text-[10px] px-1.5 py-0.2 rounded font-semibold bg-amber-500 text-white shadow-xs">
+                  ⚡ XM FEED
                 </span>
               )}
 

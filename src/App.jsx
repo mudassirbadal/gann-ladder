@@ -28,6 +28,7 @@ import MobileMenuDrawer from './components/Drawers/MobileMenuDrawer';
 import TradingJournalDrawer from './components/Journal/TradingJournalDrawer';
 import { usePaperTrading } from './hooks/usePaperTrading';
 import { useAstroEngine } from './hooks/useAstroEngine';
+import { loadXmConfig, saveXmConfig } from './utils/xmMetaApi';
 
 export default function App() {
   const [dataMode, setDataMode] = useState('reference');
@@ -58,6 +59,13 @@ export default function App() {
       return { botToken: '', chatId: '', enabled: false };
     }
   });
+
+  // XM Broker Gold Feed Config (MetaApi Cloud)
+  const [xmConfig, setXmConfig] = useState(() => loadXmConfig());
+
+  useEffect(() => {
+    saveXmConfig(xmConfig);
+  }, [xmConfig]);
 
   const [alertsLog, setAlertsLog] = useState([
     {
@@ -127,9 +135,10 @@ export default function App() {
     liveCandles15m,
     wsConnected,
     priceTickFlash,
+    xmFeedActive,
     fetchBinanceLiveMarket,
     fetchKlinesByInterval
-  } = useBinanceMarket({ assets, dataMode });
+  } = useBinanceMarket({ assets, dataMode, xmConfig });
 
   // Notification dispatcher
   const triggerNotification = useCallback(
@@ -495,6 +504,7 @@ export default function App() {
         alertsCount={alertsLog.length}
         openTradesCount={paperTrading.openTrades.length}
         autoTradingEnabled={paperTrading.autoTradingEnabled}
+        xmFeedActive={xmFeedActive}
         onOpenAlerts={() => setActiveDrawer('alerts')}
         onOpenSettings={() => setActiveDrawer('settings')}
         onOpenPwa={() => setActiveDrawer('pwa')}
@@ -581,6 +591,7 @@ export default function App() {
         astroOverride={astroOverride}
         setAstroOverride={setAstroOverride}
         confluenceSignal={confluenceSignal}
+        xmFeedActive={xmFeedActive}
       />
 
       {/* Mobile Bottom Thumb Navigation */}
@@ -635,6 +646,8 @@ export default function App() {
         setAssets={setAssets}
         telegramConfig={telegramConfig}
         setTelegramConfig={setTelegramConfig}
+        xmConfig={xmConfig}
+        setXmConfig={setXmConfig}
         onTestNotification={() =>
           triggerNotification({
             symbol: activeItem.ticker,

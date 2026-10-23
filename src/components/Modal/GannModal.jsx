@@ -34,7 +34,8 @@ export default function GannModal({
   astroState,
   astroOverride,
   setAstroOverride,
-  confluenceSignal
+  confluenceSignal,
+  xmFeedActive
 }) {
   if (!isOpen || !activeItem) return null;
 
@@ -64,6 +65,7 @@ export default function GannModal({
           dataMode={dataMode}
           wsConnected={wsConnected}
           priceTickFlash={priceTickFlash}
+          xmFeedActive={xmFeedActive}
           showAnchorPopover={showAnchorPopover}
           setShowAnchorPopover={setShowAnchorPopover}
           modalTab={modalTab}

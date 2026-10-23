@@ -20,6 +20,7 @@ export default function Header({
   alertsCount,
   openTradesCount = 0,
   autoTradingEnabled = false,
+  xmFeedActive = false,
   onOpenAlerts,
   onOpenSettings,
   onOpenPwa,
@@ -45,8 +46,13 @@ export default function Header({
               GANN SQUARE OF 9
             </span>
             <span
-              className="text-[9px] sm:text-[10px] text-stone-500 font-mono flex items-center gap-1"
+              className="text-[9px] sm:text-[10px] text-stone-500 font-mono flex items-center gap-1.5 flex-wrap"
             >
+              {xmFeedActive && (
+                <span className="text-amber-800 font-semibold flex items-center gap-0.5 bg-amber-100/90 px-1.5 py-0.2 rounded border border-amber-300">
+                  ⚡ XM GOLD
+                </span>
+              )}
               {dataMode === 'live' ? (
                 <>
                   {wsConnected ? (
