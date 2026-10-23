@@ -31,6 +31,8 @@ import { useAstroEngine } from './hooks/useAstroEngine';
 import { loadXmConfig, saveXmConfig } from './utils/xmMetaApi';
 import { useUser } from '@clerk/clerk-react';
 import { syncUserProfile } from './utils/supabaseClient';
+import { Toaster, sileo } from 'sileo';
+import 'sileo/styles.css';
 
 export default function App() {
   const { user, isSignedIn } = useUser();
@@ -161,19 +163,54 @@ export default function App() {
       setAlertsLog((prev) => [newAlert, ...prev.slice(0, 49)]);
       setActiveToast(newAlert);
 
+      // In-App Sileo Physics Toast Notification
+      const toastPayload = {
+        title: `${symbol}: ${title}`,
+        description: `${message} · Price: $${formatPrice(currentPrice)}`,
+        duration: 4500,
+        position: 'top-right'
+      };
+      if (type === 'rejection') {
+        sileo.error(toastPayload);
+      } else if (type === 'bounce') {
+        sileo.success(toastPayload);
+      } else {
+        sileo.info(toastPayload);
+      }
+
       if (soundEnabled) {
         playAlertChime(type === 'rejection' ? 'rejection' : 'bounce');
       }
 
-      // Browser push notification
+      // OS System Notification (Visible on Phone Lock Screen, Notification Drawer & Inactive/Background)
       if (browserPushEnabled && 'Notification' in window && Notification.permission === 'granted') {
-        try {
-          new Notification(`${symbol}: ${title}`, {
-            body: `${message} | Price: $${formatPrice(currentPrice)}`,
-            tag: newAlert.id
-          });
-        } catch {
-          // mobile notification fallback
+        const notifTitle = `${symbol}: ${title}`;
+        const notifOptions = {
+          body: `${message} | Price: $${formatPrice(currentPrice)} (Degree: ${degree || 'Gann'})`,
+          icon: '/pwa-icon.svg',
+          badge: '/pwa-icon.svg',
+          tag: newAlert.id,
+          vibrate: [200, 100, 200],
+          requireInteraction: true,
+          data: { url: '/' }
+        };
+
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.ready
+            .then((reg) => reg.showNotification(notifTitle, notifOptions))
+            .catch(() => {
+              try {
+                new Notification(notifTitle, notifOptions);
+              } catch {
+                // ignore
+              }
+            });
+        } else {
+          try {
+            new Notification(notifTitle, notifOptions);
+          } catch {
+            // ignore
+          }
         }
       }
 
@@ -501,6 +538,9 @@ export default function App() {
         fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
       }}
     >
+      {/* Sileo Physics In-App Toaster */}
+      <Toaster position="top-right" theme="light" />
+
       {/* Floating Live Notification Toast */}
       <ToastAlert
         alert={activeToast}

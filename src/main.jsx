@@ -8,10 +8,12 @@ const CLERK_PUBLISHABLE_KEY =
   import.meta.env.VITE_CLERK_PUBLISHABLE_KEY ||
   'pk_test_Y2hhcm1lZC1lZ3JldC0xMTg2LmNsZXJrLmFjY291bnRzLmRldiQ';
 
-// Register PWA service worker
-if ('serviceWorker' in navigator && import.meta.env.PROD) {
+// Register PWA service worker for background & lock-screen notifications
+if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
+    navigator.serviceWorker.register('/sw.js').catch((err) => {
+      console.warn('Service worker registration failed:', err);
+    });
   });
 }
 
