@@ -9,7 +9,8 @@ import {
   BookOpen,
   Briefcase,
   Menu,
-  LogIn
+  LogIn,
+  Activity
 } from 'lucide-react';
 import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react';
 
@@ -25,6 +26,7 @@ export default function Header({
   xmFeedActive = false,
   user,
   isSignedIn = false,
+  onOpenAnalytics,
   onOpenAlerts,
   onOpenSettings,
   onOpenPwa,
@@ -134,6 +136,17 @@ export default function Header({
                 {alertsCount}
               </span>
             )}
+          </button>
+
+          {/* Bot Analytics Button (Desktop) */}
+          <button
+            onClick={onOpenAnalytics}
+            className="hidden sm:flex px-2 sm:px-3 py-1.5 rounded-lg bg-[#fcfaf5] border border-[#dcd4c4] text-stone-800 hover:bg-[#f4efe4] active:scale-95 transition items-center gap-1.5 text-xs font-medium"
+            title="Trading Bot Analytics & Performance"
+            aria-label="Open trading bot analytics"
+          >
+            <Activity className="w-3.5 h-3.5 text-emerald-700" />
+            <span>Analytics</span>
           </button>
 
           {/* Paper Trading Journal Button (Desktop) */}

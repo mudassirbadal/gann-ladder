@@ -9,7 +9,8 @@ import {
   Filter,
   Bot,
   Zap,
-  DollarSign
+  DollarSign,
+  Sliders
 } from 'lucide-react';
 import { formatPrice } from '../../utils/formatters';
 import CustomDropdown from '../Common/CustomDropdown';
@@ -30,6 +31,10 @@ export default function TradingJournalDrawer({
     closedTrades = [],
     autoTradingEnabled,
     setAutoTradingEnabled,
+    startingBalance = 300,
+    setStartingBalance,
+    leverage = 1000,
+    setLeverage,
     closeTradeManually,
     deleteTrade,
     clearJournalHistory,
@@ -170,60 +175,112 @@ export default function TradingJournalDrawer({
             </button>
           </div>
 
-          {/* Account Performance & $100 Normalized Return Metric Cards */}
+          {/* User-Configurable Account Starting Balance & Leverage Bar */}
+          <div className="p-3 rounded-2xl bg-[#f4efe2] border border-[#dcd3bf] space-y-2 font-mono">
+            <div className="flex items-center justify-between text-[11px] font-bold text-stone-900">
+              <span className="flex items-center gap-1.5">
+                <Sliders className="w-3.5 h-3.5 text-stone-700" />
+                <span>Account Capital & Leverage:</span>
+              </span>
+              <span className="text-[10px] text-stone-500 font-normal">Customizable</span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-[10px] text-stone-600 block mb-0.5">Starting Equity ($):</label>
+                <div className="relative">
+                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-stone-400 text-xs">$</span>
+                  <input
+                    type="number"
+                    min="10"
+                    step="50"
+                    value={startingBalance}
+                    onChange={(e) => setStartingBalance && setStartingBalance(Math.max(10, Number(e.target.value) || 0))}
+                    className="w-full pl-6 pr-2 py-1.5 rounded-xl border border-[#d5ccb8] bg-white text-xs font-bold font-mono text-stone-900 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[10px] text-stone-600 block mb-0.5">Trading Leverage (1:X):</label>
+                <select
+                  value={leverage}
+                  onChange={(e) => setLeverage && setLeverage(Number(e.target.value))}
+                  className="w-full px-2.5 py-1.5 rounded-xl border border-[#d5ccb8] bg-white text-xs font-bold font-mono text-stone-900 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                >
+                  <option value={50}>1:50 (Ultra Safe)</option>
+                  <option value={100}>1:100 (Safe)</option>
+                  <option value={200}>1:200 (Standard)</option>
+                  <option value={500}>1:500 (Aggressive)</option>
+                  <option value={1000}>1:1000 (Maximum)</option>
+                  <option value={2000}>1:2000 (Ultra)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Account Performance & $100 Normalized Return Metric Cards — Uniform Row Alignment */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 font-mono">
-            {/* Account Equity */}
-            <div className="p-2.5 rounded-xl bg-white border border-[#e2d8c4]">
-              <div className="text-[9px] uppercase text-stone-500">Account Equity</div>
-              <div className="text-sm sm:text-base font-bold text-stone-900 mt-0.5">
-                ${formatPrice(stats.currentEquity || 300)}
+            {/* 1. Account Equity */}
+            <div className="h-[74px] p-2.5 rounded-xl bg-white border border-[#e2d8c4] flex flex-col justify-between shadow-2xs">
+              <div className="text-[9.5px] uppercase font-bold text-stone-500 tracking-wider truncate">
+                Equity
+              </div>
+              <div className="text-sm sm:text-base font-black text-stone-900 leading-none truncate">
+                ${formatPrice(stats.currentEquity || startingBalance)}
               </div>
               <div
-                className={`text-[9.5px] font-bold ${
+                className={`text-[10px] font-bold leading-none truncate ${
                   (stats.returnPct || 0) >= 0 ? 'text-emerald-700' : 'text-red-700'
                 }`}
               >
                 {(stats.returnPct || 0) >= 0 ? '+' : ''}
-                {stats.returnPct || 0}% Return
+                {(stats.returnPct || 0).toFixed(1)}% Return
               </div>
             </div>
 
-            {/* Normalized $100 Investment ROI */}
-            <div className="p-2.5 rounded-xl bg-[#faf7ed] border border-[#dccfae]">
-              <div className="text-[9px] uppercase text-amber-800 font-bold flex items-center gap-0.5">
-                <DollarSign className="w-2.5 h-2.5" />
-                <span>On $100 Invested</span>
+            {/* 2. Normalized $100 Baseline — Clean, non-misplaced single-line format */}
+            <div className="h-[74px] p-2.5 rounded-xl bg-[#faf7ed] border border-[#dccfae] flex flex-col justify-between shadow-2xs">
+              <div className="text-[9.5px] uppercase font-bold text-amber-800 tracking-wider truncate flex items-center gap-1">
+                <DollarSign className="w-2.5 h-2.5 shrink-0" />
+                <span className="truncate">$100 Baseline</span>
+              </div>
+              <div className="text-sm sm:text-base font-black text-amber-950 leading-none truncate">
+                ${formatPrice(stats.normalized100Current || 100)}
               </div>
               <div
-                className={`text-sm sm:text-base font-bold mt-0.5 ${
+                className={`text-[10px] font-bold leading-none truncate ${
                   (stats.normalized100Profit || 0) >= 0 ? 'text-emerald-700' : 'text-red-700'
                 }`}
               >
-                ${formatPrice(stats.normalized100Current || 100)}
-              </div>
-              <div className="text-[9px] text-stone-600">
-                {(stats.normalized100Profit || 0) >= 0 ? '+' : ''}${formatPrice(stats.normalized100Profit || 0)} profit
+                {(stats.normalized100Profit || 0) >= 0 ? '+' : ''}${formatPrice(stats.normalized100Profit || 0)}
               </div>
             </div>
 
-            {/* Win Rate */}
-            <div className="p-2.5 rounded-xl bg-white border border-[#e2d8c4]">
-              <div className="text-[9px] uppercase text-stone-500">Win Rate</div>
-              <div className="text-sm sm:text-base font-bold text-amber-700 mt-0.5">
+            {/* 3. Win Rate */}
+            <div className="h-[74px] p-2.5 rounded-xl bg-white border border-[#e2d8c4] flex flex-col justify-between shadow-2xs">
+              <div className="text-[9.5px] uppercase font-bold text-stone-500 tracking-wider truncate">
+                Win Rate
+              </div>
+              <div className="text-sm sm:text-base font-black text-amber-700 leading-none truncate">
                 {stats.winRate || 0}%
               </div>
-              <div className="text-[9px] text-stone-500">
-                {stats.winsCount || 0}W / {stats.lossesCount || 0}L
+              <div className="text-[10px] text-stone-500 font-medium leading-none truncate">
+                {stats.winsCount || 0}W · {stats.lossesCount || 0}L
               </div>
             </div>
 
-            {/* R:R & Leverage */}
-            <div className="p-2.5 rounded-xl bg-white border border-[#e2d8c4]">
-              <div className="text-[9px] uppercase text-stone-500">R:R Ratio</div>
-              <div className="text-sm sm:text-base font-bold text-emerald-800 mt-0.5">
+            {/* 4. R:R & Leverage */}
+            <div className="h-[74px] p-2.5 rounded-xl bg-white border border-[#e2d8c4] flex flex-col justify-between shadow-2xs">
+              <div className="text-[9.5px] uppercase font-bold text-stone-500 tracking-wider truncate">
+                R:R · Leverage
+              </div>
+              <div className="text-sm sm:text-base font-black text-emerald-800 leading-none truncate">
                 1 : 2.0R
               </div>
-              <div className="text-[9px] text-stone-500">1:1000 Leverage</div>
+              <div className="text-[10px] text-stone-600 font-medium leading-none truncate">
+                1:{leverage} Lev
+              </div>
             </div>
           </div>
 

@@ -111,6 +111,15 @@ export function usePaperTrading({ livePrices, onTradeAlert, user }) {
     }
   });
 
+  const [leverage, setLeverage] = useState(() => {
+    try {
+      const saved = localStorage.getItem('gann_paper_leverage');
+      return saved ? Number(saved) : DEFAULT_LEVERAGE;
+    } catch {
+      return DEFAULT_LEVERAGE;
+    }
+  });
+
   const lastAutoTradeRef = useRef({});
 
   // Persist state to localStorage
@@ -137,6 +146,14 @@ export function usePaperTrading({ livePrices, onTradeAlert, user }) {
       // ignore storage error
     }
   }, [startingBalance]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('gann_paper_leverage', String(leverage));
+    } catch {
+      // ignore storage error
+    }
+  }, [leverage]);
 
   // Automated monitoring of OPEN trades against live price ticks
   useEffect(() => {
@@ -403,7 +420,7 @@ export function usePaperTrading({ livePrices, onTradeAlert, user }) {
             symbol: activeItem.id,
             currentPrice: priceNow,
             accountBalance: startingBalance,
-            leverage: DEFAULT_LEVERAGE
+            leverage
           });
 
           executePaperTrade(setup, activeItem, r1.rank, r1.degree, true);
@@ -413,7 +430,7 @@ export function usePaperTrading({ livePrices, onTradeAlert, user }) {
               symbol: activeItem.ticker,
               type: 'rejection',
               title: `🤖 Auto-Trade SHORT Executed (${r1.degree}°)`,
-              message: `Auto-entered SHORT on ${activeItem.ticker} at $${formatPrice(setup.entry)} | SL: $${formatPrice(setup.stopLoss)} (-$${setup.maxRiskDollar}), TP: $${formatPrice(setup.takeProfit1)} (+$${setup.maxRiskDollar * 2}, 1:2 R:R, 1:1000 Lev).`
+              message: `Auto-entered SHORT on ${activeItem.ticker} at $${formatPrice(setup.entry)} | SL: $${formatPrice(setup.stopLoss)} (-$${setup.maxRiskDollar}), TP: $${formatPrice(setup.takeProfit1)} (+$${setup.maxRiskDollar * 2}, 1:2 R:R, 1:${leverage} Lev).`
             });
           }
           return;
@@ -435,7 +452,7 @@ export function usePaperTrading({ livePrices, onTradeAlert, user }) {
             symbol: activeItem.id,
             currentPrice: priceNow,
             accountBalance: startingBalance,
-            leverage: DEFAULT_LEVERAGE
+            leverage
           });
 
           executePaperTrade(setup, activeItem, b1.rank, b1.degree, true);
@@ -445,13 +462,13 @@ export function usePaperTrading({ livePrices, onTradeAlert, user }) {
               symbol: activeItem.ticker,
               type: 'bounce',
               title: `🤖 Auto-Trade LONG Executed (${b1.degree}°)`,
-              message: `Auto-entered LONG on ${activeItem.ticker} at $${formatPrice(setup.entry)} | SL: $${formatPrice(setup.stopLoss)} (-$${setup.maxRiskDollar}), TP: $${formatPrice(setup.takeProfit1)} (+$${setup.maxRiskDollar * 2}, 1:2 R:R, 1:1000 Lev).`
+              message: `Auto-entered LONG on ${activeItem.ticker} at $${formatPrice(setup.entry)} | SL: $${formatPrice(setup.stopLoss)} (-$${setup.maxRiskDollar}), TP: $${formatPrice(setup.takeProfit1)} (+$${setup.maxRiskDollar * 2}, 1:2 R:R, 1:${leverage} Lev).`
             });
           }
         }
       }
     },
-    [autoTradingEnabled, trades, startingBalance, executePaperTrade, onTradeAlert]
+    [autoTradingEnabled, trades, startingBalance, leverage, executePaperTrade, onTradeAlert]
   );
 
   // Close an open trade manually at market
@@ -595,9 +612,9 @@ export function usePaperTrading({ livePrices, onTradeAlert, user }) {
       returnPct,
       normalized100Current,
       normalized100Profit,
-      leverage: DEFAULT_LEVERAGE
+      leverage
     };
-  }, [trades, startingBalance]);
+  }, [trades, startingBalance, leverage]);
 
   return {
     trades,
@@ -607,6 +624,8 @@ export function usePaperTrading({ livePrices, onTradeAlert, user }) {
     setAutoTradingEnabled,
     startingBalance,
     setStartingBalance,
+    leverage,
+    setLeverage,
     executePaperTrade,
     evaluateAndTriggerAutoTrade,
     closeTradeManually,

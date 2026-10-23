@@ -15,7 +15,8 @@ import {
   ChevronRight,
   Cpu,
   LogIn,
-  Database
+  Database,
+  Activity
 } from 'lucide-react';
 import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react';
 import { formatPrice } from '../../utils/formatters';
@@ -30,6 +31,7 @@ export default function MobileMenuDrawer({
   paperTrading,
   user,
   isSignedIn = false,
+  onOpenAnalytics,
   onOpenJournal,
   onOpenRules,
   onOpenAlerts,
@@ -271,6 +273,30 @@ export default function MobileMenuDrawer({
             <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-stone-500 px-1">
               Main Sections
             </span>
+
+            {/* Trading Bot Analytics Option in Hamburger Menu */}
+            <button
+              onClick={() => handleAnimatedClose(onOpenAnalytics)}
+              className="w-full p-2.5 rounded-xl bg-[#faf7f0] border border-[#e2dac9] hover:bg-[#f3ede0] hover:translate-x-1 text-stone-800 flex items-center justify-between transition-all duration-150 active:scale-[0.97] group shadow-2xs"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0 transition-transform duration-150 group-hover:scale-110">
+                  <Activity className="w-4 h-4" />
+                </div>
+                <div className="text-left">
+                  <div className="text-xs font-bold flex items-center gap-1.5">
+                    <span>Bot Trading Analytics</span>
+                    <span className="px-1.5 py-0.2 rounded font-mono text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                      {paperTrading?.stats?.winRate || 0}% WR
+                    </span>
+                  </div>
+                  <div className="text-[10px] text-stone-500 font-mono">
+                    Win/Loss ratios, breakeven & delete bot data
+                  </div>
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-stone-400 transition-transform duration-150 group-hover:translate-x-1" />
+            </button>
 
             {/* Trading Rules & Playbook */}
             <button
