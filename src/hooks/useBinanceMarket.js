@@ -96,8 +96,12 @@ export function useBinanceMarket({ assets, dataMode, xmConfig }) {
   }, [dataMode, assets, xmConfig]);
 
   // 1b. Real-Time Polling for XM Broker Gold (MetaApi Cloud)
+  const isXmActive = Boolean(
+    xmConfig && xmConfig.enabled && xmConfig.token && xmConfig.accountId
+  );
+
   useEffect(() => {
-    if (dataMode !== 'live' || !xmConfig?.enabled || !xmConfig?.token || !xmConfig?.accountId) {
+    if (dataMode !== 'live' || !isXmActive) {
       setXmFeedActive(false);
       return;
     }
