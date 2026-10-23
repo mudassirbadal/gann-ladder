@@ -33,6 +33,8 @@ export default function TradingJournalDrawer({
     closeTradeManually,
     deleteTrade,
     clearJournalHistory,
+    deleteBotTradesOnly,
+    deleteAllTradingData,
     cloudSynced = false,
     stats = {}
   } = paperTrading || {};
@@ -448,16 +450,43 @@ export default function TradingJournalDrawer({
           )}
         </div>
 
-        {/* Clear History Button */}
-        {closedTrades.length > 0 && (
-          <button
-            onClick={clearJournalHistory}
-            className="mt-6 w-full py-2 rounded-xl border border-[#dcd4c4] text-xs font-semibold text-stone-600 hover:bg-[#f2ece0] active:scale-98 transition flex items-center justify-center gap-1.5"
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-            <span>Clear Journal History</span>
-          </button>
-        )}
+        {/* Trading Bot & Journal Data Management Section */}
+        <div className="mt-6 pt-4 border-t border-[#e5decb] space-y-2.5">
+          <div className="flex items-center justify-between text-[11px] font-mono text-stone-600 font-semibold">
+            <span>Trading Data Management:</span>
+            <span className="text-[10px] text-stone-400 font-normal">
+              {isSignedIn ? 'Cloud DB Synced' : 'Local Storage'}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 font-mono">
+            <button
+              onClick={() => {
+                if (window.confirm('Delete all auto-trading bot trades from your database? Manual trades will be preserved.')) {
+                  deleteBotTradesOnly?.();
+                }
+              }}
+              className="py-2 px-2.5 rounded-xl border border-amber-300 bg-amber-50 text-[10.5px] font-bold text-amber-900 hover:bg-amber-100 active:scale-95 transition flex items-center justify-center gap-1.5 shadow-2xs"
+              title="Delete all bot orders only"
+            >
+              <Bot className="w-3.5 h-3.5 text-amber-700" />
+              <span>Delete Bot Trades</span>
+            </button>
+
+            <button
+              onClick={() => {
+                if (window.confirm('Are you sure you want to COMPLETELY wipe all trading bot records, journal history, and reset your starting balance to $300? This cannot be undone.')) {
+                  deleteAllTradingData?.();
+                }
+              }}
+              className="py-2 px-2.5 rounded-xl border border-red-300 bg-red-50 text-[10.5px] font-bold text-red-800 hover:bg-red-100 active:scale-95 transition flex items-center justify-center gap-1.5 shadow-2xs"
+              title="Permanently wipe all trading records"
+            >
+              <Trash2 className="w-3.5 h-3.5 text-red-600" />
+              <span>Wipe All Data</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

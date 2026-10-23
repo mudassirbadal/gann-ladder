@@ -200,3 +200,28 @@ export async function clearAllUserTrades(userId) {
     return false;
   }
 }
+
+/**
+ * Completely wipe all auto-trading bot records for a specific user from Supabase
+ */
+export async function deleteUserBotTrades(userId) {
+  if (!userId) return false;
+
+  try {
+    const { error } = await supabase
+      .from('trades')
+      .delete()
+      .eq('user_id', userId)
+      .ilike('notes', '%Auto%');
+
+    if (error) {
+      console.warn('Supabase deleteUserBotTrades error:', error.message);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.warn('Supabase deleteUserBotTrades exception:', err);
+    return false;
+  }
+}
+

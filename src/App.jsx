@@ -26,6 +26,7 @@ import PwaDrawer from './components/Drawers/PwaDrawer';
 import RulesDrawer from './components/Drawers/RulesDrawer';
 import MobileMenuDrawer from './components/Drawers/MobileMenuDrawer';
 import TradingJournalDrawer from './components/Journal/TradingJournalDrawer';
+import BotAnalyticsDashboard from './components/Analytics/BotAnalyticsDashboard';
 import { usePaperTrading } from './hooks/usePaperTrading';
 import { useAstroEngine } from './hooks/useAstroEngine';
 import { loadXmConfig, saveXmConfig } from './utils/xmMetaApi';
@@ -552,6 +553,16 @@ export default function App() {
             setIsModalOpen(true);
             setModalTab('ladder');
           }}
+        />
+      </div>
+
+      {/* Trading Bot Analytics & Performance Dashboard */}
+      <div className="max-w-5xl mx-auto px-3 sm:px-6 mb-3 sm:mb-4">
+        <BotAnalyticsDashboard
+          paperTrading={paperTrading}
+          onOpenJournal={() => setActiveDrawer('journal')}
+          isSignedIn={isSignedIn}
+          user={user}
         />
       </div>
 

@@ -10,7 +10,8 @@ import {
   insertUserTrade,
   updateUserTradeStatus,
   deleteUserTrade,
-  clearAllUserTrades
+  clearAllUserTrades,
+  deleteUserBotTrades
 } from '../utils/supabaseClient';
 
 const STORAGE_KEY = 'gann_paper_trades';
@@ -510,19 +511,63 @@ export function usePaperTrading({ livePrices, onTradeAlert, user }) {
     setTrades([]);
   }, [userId]);
 
+  // Permanently delete only Bot trades (preserving manual records)
+  const deleteBotTradesOnly = useCallback(async () => {
+    if (userId) {
+      await deleteUserBotTrades(userId);
+    }
+    setTrades((prev) => prev.filter((t) => !t.isAuto));
+  }, [userId]);
+
+  // Completely wipe all trading bot and personal trade data
+  const deleteAllTradingData = useCallback(async () => {
+    if (userId) {
+      await clearAllUserTrades(userId);
+    }
+    setTrades([]);
+    setStartingBalance(DEFAULT_STARTING_BALANCE);
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(STARTING_BALANCE_KEY);
+    } catch {
+      // ignore
+    }
+  }, [userId]);
+
   // Compute overall performance statistics & monthly profit metrics
   const stats = useMemo(() => {
     const closed = trades.filter((t) => t.status !== 'OPEN');
     const open = trades.filter((t) => t.status === 'OPEN');
-    const wins = closed.filter((t) => t.status === 'WIN');
-    const losses = closed.filter((t) => t.status === 'LOSS');
+    
+    // Win, Breakeven, and Loss classification
+    const wins = closed.filter(
+      (t) => t.status === 'WIN' || t.status === 'WON' || (t.pnlDollar > 0.05)
+    );
+    const breakeven = closed.filter(
+      (t) =>
+        t.status === 'BREAKEAVEN' ||
+        t.status === 'BREAKEVEN' ||
+        Math.abs(t.pnlDollar || 0) <= 0.05
+    );
+    const losses = closed.filter(
+      (t) =>
+        (t.status === 'LOSS' || t.status === 'LOST') &&
+        !(Math.abs(t.pnlDollar || 0) <= 0.05)
+    );
+
     const autoTrades = trades.filter((t) => t.isAuto);
 
     const totalRealizedPnl = closed.reduce((acc, t) => acc + (t.pnlDollar || 0), 0);
-    const winRate = closed.length > 0 ? (wins.length / closed.length) * 100 : 0;
+    const totalCount = trades.length;
+    const closedCount = closed.length;
+
+    const winRate = closedCount > 0 ? (wins.length / closedCount) * 100 : 0;
+    const breakevenRate = closedCount > 0 ? (breakeven.length / closedCount) * 100 : 0;
+    const lossRate = closedCount > 0 ? (losses.length / closedCount) * 100 : 0;
+
     const avgRr =
-      closed.length > 0
-        ? closed.reduce((acc, t) => acc + (t.rrRatio || 2.0), 0) / closed.length
+      closedCount > 0
+        ? closed.reduce((acc, t) => acc + (t.rrRatio || 2.0), 0) / closedCount
         : 2.0;
 
     const currentEquity = Number((startingBalance + totalRealizedPnl).toFixed(2));
@@ -533,13 +578,16 @@ export function usePaperTrading({ livePrices, onTradeAlert, user }) {
     const normalized100Profit = Number((normalized100Current - 100).toFixed(2));
 
     return {
-      totalTrades: trades.length,
+      totalTrades: totalCount,
       openCount: open.length,
-      closedCount: closed.length,
+      closedCount,
       winsCount: wins.length,
+      breakevenCount: breakeven.length,
       lossesCount: losses.length,
       autoCount: autoTrades.length,
       winRate: Number(winRate.toFixed(1)),
+      breakevenRate: Number(breakevenRate.toFixed(1)),
+      lossRate: Number(lossRate.toFixed(1)),
       totalRealizedPnl: Number(totalRealizedPnl.toFixed(2)),
       avgRr: Number(avgRr.toFixed(2)),
       startingBalance,
@@ -564,6 +612,8 @@ export function usePaperTrading({ livePrices, onTradeAlert, user }) {
     closeTradeManually,
     deleteTrade,
     clearJournalHistory,
+    deleteBotTradesOnly,
+    deleteAllTradingData,
     cloudSynced,
     stats
   };
