@@ -197,8 +197,8 @@ export default function Header({
             <span>Install App</span>
           </button>
 
-          {/* Clerk Google Authentication (Desktop & Mobile) */}
-          <div className="flex items-center pl-1">
+          {/* Clerk Google Authentication (Desktop Only - on mobile it lives inside Hamburger Menu) */}
+          <div className="hidden sm:flex items-center pl-1">
             <SignedIn>
               <div className="flex items-center gap-2">
                 <UserButton

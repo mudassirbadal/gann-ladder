@@ -262,9 +262,11 @@ export function buildPlanetaryHours(date, tzOffset = 5.5) {
 
 export function formatHourClock(hDec) {
   const hNorm = ((hDec % 24) + 24) % 24;
-  const hh = Math.floor(hNorm);
-  const mm = Math.round((hNorm - hh) * 60) % 60;
-  return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
+  const rawH = Math.floor(hNorm);
+  const mm = Math.round((hNorm - rawH) * 60) % 60;
+  const period = rawH >= 12 ? 'PM' : 'AM';
+  const h12 = rawH % 12 === 0 ? 12 : rawH % 12;
+  return `${String(h12).padStart(2, '0')}:${String(mm).padStart(2, '0')} ${period}`;
 }
 
 export function computeFullAstroState(date, astroOverride = "bearish_short") {

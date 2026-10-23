@@ -167,39 +167,48 @@ export default function GrahaChakraPanel({ astroState }) {
         <h4 className="text-xs sm:text-sm font-bold text-stone-800 mb-2">
           Intraday Chaldean Planetary Hours (IST) — Downside / Upside Windows
         </h4>
-        <div className="max-h-52 overflow-y-auto rounded-xl border border-[#e3d5b8] p-1.5 space-y-1 bg-white/60">
+        <div className="max-h-56 overflow-y-auto overflow-x-auto rounded-xl border border-[#e3d5b8] p-1.5 space-y-1 bg-white/60">
           {astroState.hours.slice(0, 16).map((h) => (
             <div
               key={h.index}
-              className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg text-[11px] transition ${
+              className={`grid grid-cols-[138px_1fr_auto] items-center gap-2 px-2.5 py-1.5 rounded-lg text-[11px] transition min-w-[320px] ${
                 h.isNow
-                  ? 'bg-[#fdf4dc] border border-[#c89d14] font-bold'
+                  ? 'bg-[#fdf4dc] border border-[#c89d14] font-bold shadow-2xs'
                   : 'hover:bg-[#faf5ea]'
               }`}
             >
-              <span className="text-stone-500 font-mono">
-                {formatHourClock(h.startHr)}–{formatHourClock(h.endHr)}
-              </span>
+              {/* Col 1: Time Window in 12-Hour AM/PM IST */}
+              <div className="text-stone-500 font-mono text-[10px] sm:text-[10.5px] tracking-tight whitespace-nowrap">
+                {formatHourClock(h.startHr)} – {formatHourClock(h.endHr)}
+              </div>
 
-              <span className="text-stone-800 flex items-center gap-1">
-                <span>{h.planet.glyph}</span>
-                <span>{h.planet.name} Hora</span>
-                {h.isNow && <span className="text-amber-800 text-[10px] font-extrabold">● NOW</span>}
-              </span>
+              {/* Col 2: Planet Glyph + Name + Hora (strictly vertical column alignment) */}
+              <div className="flex items-center gap-1.5 text-stone-800 font-medium min-w-0">
+                <span className="w-4 text-center shrink-0 font-normal text-xs">{h.planet.glyph}</span>
+                <span className="truncate">{h.planet.name} Hora</span>
+                {h.isNow && (
+                  <span className="text-amber-900 text-[8.5px] font-black px-1.5 py-0.2 rounded-full bg-amber-300 border border-amber-500 shrink-0 animate-pulse">
+                    NOW
+                  </span>
+                )}
+              </div>
 
-              <span
-                className={`text-[9.5px] font-bold px-2 py-0.5 rounded-full ${
-                  h.bias.tag === 'fall'
-                    ? 'bg-rose-100 text-rose-800'
-                    : h.bias.tag === 'rise'
-                    ? 'bg-emerald-100 text-emerald-800'
-                    : 'bg-[#f3ead8] text-stone-600'
-                }`}
-              >
-                {h.bias.tag === 'fall'
-                  ? `SHORT BIAS ${h.bias.base}%`
-                  : `${h.bias.label} ${h.bias.base}%`}
-              </span>
+              {/* Col 3: Bias Badge */}
+              <div className="flex justify-end shrink-0">
+                <span
+                  className={`text-[9.5px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap ${
+                    h.bias.tag === 'fall'
+                      ? 'bg-rose-100 text-rose-800'
+                      : h.bias.tag === 'rise'
+                      ? 'bg-emerald-100 text-emerald-800'
+                      : 'bg-[#f3ead8] text-stone-600'
+                  }`}
+                >
+                  {h.bias.tag === 'fall'
+                    ? `SHORT ${h.bias.base}%`
+                    : `${h.bias.label} ${h.bias.base}%`}
+                </span>
+              </div>
             </div>
           ))}
         </div>
