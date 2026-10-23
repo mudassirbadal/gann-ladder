@@ -13,8 +13,11 @@ import {
   RotateCcw,
   Compass,
   ChevronRight,
-  Cpu
+  Cpu,
+  LogIn,
+  Database
 } from 'lucide-react';
+import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react';
 import { formatPrice } from '../../utils/formatters';
 
 export default function MobileMenuDrawer({
@@ -25,6 +28,8 @@ export default function MobileMenuDrawer({
   soundEnabled,
   setSoundEnabled,
   paperTrading,
+  user,
+  isSignedIn = false,
   onOpenJournal,
   onOpenRules,
   onOpenAlerts,
@@ -120,6 +125,54 @@ export default function MobileMenuDrawer({
             >
               <X className="w-5 h-5" />
             </button>
+          </div>
+
+          {/* User Account & Supabase Cloud Sync Card */}
+          <div className="p-3 rounded-2xl bg-[#f4efe2] border border-[#dcd3bf]">
+            <SignedIn>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <UserButton
+                    afterSignOutUrl="/"
+                    appearance={{
+                      elements: {
+                        userButtonAvatarBox: 'w-8 h-8 border border-amber-500'
+                      }
+                    }}
+                  />
+                  <div className="min-w-0">
+                    <div className="text-xs font-bold text-stone-900 truncate">
+                      {user?.fullName || user?.firstName || 'Gann Trader'}
+                    </div>
+                    <div className="text-[10px] text-stone-500 font-mono truncate flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                      <span>Supabase Synced</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="px-2 py-0.5 rounded text-[9px] font-bold font-mono bg-emerald-100 text-emerald-800 border border-emerald-300">
+                  ONLINE
+                </div>
+              </div>
+            </SignedIn>
+            <SignedOut>
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <div className="text-xs font-bold text-stone-900">
+                    Account & Cloud Sync
+                  </div>
+                  <div className="text-[10px] text-stone-500 font-mono">
+                    Sign in to sync trades to Supabase
+                  </div>
+                </div>
+                <SignInButton mode="modal">
+                  <button className="px-3 py-1.5 rounded-xl bg-[#262420] text-amber-300 hover:bg-stone-800 text-xs font-semibold flex items-center gap-1.5 shrink-0 shadow-xs active:scale-95 transition">
+                    <LogIn className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Sign In</span>
+                  </button>
+                </SignInButton>
+              </div>
+            </SignedOut>
           </div>
 
           {/* Paper Trading & Auto-Bot Quick Card */}

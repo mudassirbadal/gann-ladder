@@ -8,8 +8,10 @@ import {
   Wifi,
   BookOpen,
   Briefcase,
-  Menu
+  Menu,
+  LogIn
 } from 'lucide-react';
+import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react';
 
 export default function Header({
   dataMode,
@@ -21,6 +23,8 @@ export default function Header({
   openTradesCount = 0,
   autoTradingEnabled = false,
   xmFeedActive = false,
+  user,
+  isSignedIn = false,
   onOpenAlerts,
   onOpenSettings,
   onOpenPwa,
@@ -173,12 +177,39 @@ export default function Header({
           {/* PWA Android Guide Button (Desktop) */}
           <button
             onClick={onOpenPwa}
-            className="hidden sm:flex px-2.5 py-1.5 rounded-lg bg-[#2b2925] text-[#fcfaf5] hover:bg-stone-800 active:scale-95 transition items-center gap-1.5 text-xs font-medium shadow-sm"
+            className="hidden md:flex px-2.5 py-1.5 rounded-lg bg-[#2b2925] text-[#fcfaf5] hover:bg-stone-800 active:scale-95 transition items-center gap-1.5 text-xs font-medium shadow-sm"
             title="Android & iOS PWA Guide"
           >
             <Smartphone className="w-3.5 h-3.5 text-amber-400" />
             <span>Install App</span>
           </button>
+
+          {/* Clerk Google Authentication (Desktop & Mobile) */}
+          <div className="flex items-center pl-1">
+            <SignedIn>
+              <div className="flex items-center gap-2">
+                <UserButton
+                  afterSignOutUrl="/"
+                  appearance={{
+                    elements: {
+                      userButtonAvatarBox: 'w-7 h-7 sm:w-8 sm:h-8 border border-amber-400/80 shadow-xs ring-1 ring-amber-300/30'
+                    }
+                  }}
+                />
+              </div>
+            </SignedIn>
+            <SignedOut>
+              <SignInButton mode="modal">
+                <button
+                  className="flex items-center gap-1.5 px-2.5 py-1 sm:py-1.5 rounded-lg bg-[#262420] text-amber-300 border border-amber-500/40 hover:bg-stone-800 active:scale-95 transition text-[11px] sm:text-xs font-semibold shadow-xs"
+                  title="Sign In with Google"
+                >
+                  <LogIn className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <span>Sign In</span>
+                </button>
+              </SignInButton>
+            </SignedOut>
+          </div>
 
           {/* Mobile Hamburger Menu Button on Right Side */}
           <button

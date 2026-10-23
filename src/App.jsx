@@ -29,8 +29,11 @@ import TradingJournalDrawer from './components/Journal/TradingJournalDrawer';
 import { usePaperTrading } from './hooks/usePaperTrading';
 import { useAstroEngine } from './hooks/useAstroEngine';
 import { loadXmConfig, saveXmConfig } from './utils/xmMetaApi';
+import { useUser } from '@clerk/clerk-react';
+import { syncUserProfile } from './utils/supabaseClient';
 
 export default function App() {
+  const { user, isLoaded: isUserLoaded, isSignedIn } = useUser();
   const [dataMode, setDataMode] = useState('reference');
   const [assets, setAssets] = useState(INITIAL_ASSETS);
   const [selectedSymbol, setSelectedSymbol] = useState('BTCUSDT');
@@ -204,10 +207,18 @@ export default function App() {
     [soundEnabled, browserPushEnabled, telegramConfig]
   );
 
-  // Paper Trading Execution & Journal Engine
+  // Auto-sync Clerk user profile with Supabase profiles table
+  useEffect(() => {
+    if (isSignedIn && user) {
+      syncUserProfile(user);
+    }
+  }, [isSignedIn, user]);
+
+  // Paper Trading Execution & Journal Engine (Synced with Supabase Cloud DB)
   const paperTrading = usePaperTrading({
     livePrices,
-    onTradeAlert: triggerNotification
+    onTradeAlert: triggerNotification,
+    user
   });
 
   // Proximity Radar automated warning
@@ -505,6 +516,8 @@ export default function App() {
         openTradesCount={paperTrading.openTrades.length}
         autoTradingEnabled={paperTrading.autoTradingEnabled}
         xmFeedActive={xmFeedActive}
+        user={user}
+        isSignedIn={isSignedIn}
         onOpenAlerts={() => setActiveDrawer('alerts')}
         onOpenSettings={() => setActiveDrawer('settings')}
         onOpenPwa={() => setActiveDrawer('pwa')}
@@ -618,6 +631,8 @@ export default function App() {
         soundEnabled={soundEnabled}
         setSoundEnabled={setSoundEnabled}
         paperTrading={paperTrading}
+        user={user}
+        isSignedIn={isSignedIn}
         onOpenJournal={() => setActiveDrawer('journal')}
         onOpenRules={() => setActiveDrawer('rules')}
         onOpenAlerts={() => setActiveDrawer('alerts')}
@@ -666,6 +681,8 @@ export default function App() {
         onClose={() => setActiveDrawer(null)}
         paperTrading={paperTrading}
         livePrices={livePrices}
+        user={user}
+        isSignedIn={isSignedIn}
       />
 
       <PwaDrawer

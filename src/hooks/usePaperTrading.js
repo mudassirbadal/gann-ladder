@@ -5,12 +5,60 @@ import {
   DEFAULT_STARTING_BALANCE,
   DEFAULT_LEVERAGE
 } from '../utils/tradeRules';
+import {
+  fetchUserTrades,
+  insertUserTrade,
+  updateUserTradeStatus,
+  deleteUserTrade,
+  clearAllUserTrades
+} from '../utils/supabaseClient';
 
 const STORAGE_KEY = 'gann_paper_trades';
 const AUTO_TRADE_KEY = 'gann_auto_trading_enabled';
 const STARTING_BALANCE_KEY = 'gann_starting_balance';
 
-export function usePaperTrading({ livePrices, onTradeAlert }) {
+function mapDbTradeToUi(t) {
+  const isWon = t.status === 'WON' || t.status === 'WIN';
+  const isLost = t.status === 'LOST' || t.status === 'LOSS';
+  const status = isWon ? 'WIN' : isLost ? 'LOSS' : t.status || 'OPEN';
+  const pnlDollar = Number(t.pnl || 0);
+  const pnlPct = t.entry_price ? (pnlDollar / (Number(t.entry_price) * 0.01)) : 0;
+
+  return {
+    id: `db-${t.id}`,
+    dbId: t.id,
+    symbol: t.symbol,
+    ticker: t.symbol.includes('USDT') ? t.symbol.replace('USDT', '/USDT') : t.symbol,
+    direction: t.direction,
+    entryPrice: Number(t.entry_price),
+    stopLoss: Number(t.stop_loss),
+    takeProfit1: Number(t.take_profit),
+    takeProfit2: Number(t.take_profit),
+    status,
+    exitPrice: t.exit_price ? Number(t.exit_price) : null,
+    exitReason: t.notes || (isWon ? 'TP Hit (1:2 R:R)' : isLost ? 'SL Hit' : 'Open Position'),
+    pnlDollar,
+    pnlPct: Number(pnlPct.toFixed(2)),
+    openTime: t.created_at
+      ? new Date(t.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false }) + ' IST'
+      : getISTTimeStr(),
+    closeTime: t.closed_at
+      ? new Date(t.closed_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false }) + ' IST'
+      : null,
+    isAuto: t.notes?.includes('Auto') || false,
+    rank: 'GANN',
+    degree: 0,
+    positionUnits: 1,
+    marginRequired: 15,
+    notionalUsd: 15000,
+    leverage: DEFAULT_LEVERAGE,
+    rrRatio: 2.0
+  };
+}
+
+export function usePaperTrading({ livePrices, onTradeAlert, user }) {
+  const userId = user?.id;
+
   const [trades, setTrades] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -19,6 +67,30 @@ export function usePaperTrading({ livePrices, onTradeAlert }) {
       return [];
     }
   });
+
+  const [cloudSynced, setCloudSynced] = useState(false);
+
+  // Sync trades with Supabase on user sign-in
+  useEffect(() => {
+    if (!userId) {
+      setCloudSynced(false);
+      return;
+    }
+
+    let isMounted = true;
+    fetchUserTrades(userId).then((dbTrades) => {
+      if (!isMounted) return;
+      if (Array.isArray(dbTrades) && dbTrades.length > 0) {
+        const mapped = dbTrades.map(mapDbTradeToUi);
+        setTrades(mapped);
+      }
+      setCloudSynced(true);
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [userId]);
 
   const [autoTradingEnabled, setAutoTradingEnabled] = useState(() => {
     try {
@@ -96,6 +168,15 @@ export function usePaperTrading({ livePrices, onTradeAlert }) {
                 });
               }
 
+              if (userId && trade.dbId) {
+                updateUserTradeStatus(userId, trade.dbId, {
+                  status: 'WON',
+                  exitPrice: trade.takeProfit1,
+                  pnl: pnlDollar,
+                  closedAt: new Date().toISOString()
+                });
+              }
+
               return {
                 ...trade,
                 status: 'WIN',
@@ -119,6 +200,15 @@ export function usePaperTrading({ livePrices, onTradeAlert }) {
                   type: 'rejection',
                   title: `🛑 Stop-Loss Hit (${pnlPct.toFixed(2)}%)`,
                   message: `Paper trade on ${trade.ticker} stopped out at $${formatPrice(trade.stopLoss)} (${pnlDollar.toFixed(2)}).`
+                });
+              }
+
+              if (userId && trade.dbId) {
+                updateUserTradeStatus(userId, trade.dbId, {
+                  status: 'LOST',
+                  exitPrice: trade.stopLoss,
+                  pnl: pnlDollar,
+                  closedAt: new Date().toISOString()
                 });
               }
 
@@ -149,6 +239,15 @@ export function usePaperTrading({ livePrices, onTradeAlert }) {
                 });
               }
 
+              if (userId && trade.dbId) {
+                updateUserTradeStatus(userId, trade.dbId, {
+                  status: 'WON',
+                  exitPrice: trade.takeProfit1,
+                  pnl: pnlDollar,
+                  closedAt: new Date().toISOString()
+                });
+              }
+
               return {
                 ...trade,
                 status: 'WIN',
@@ -172,6 +271,15 @@ export function usePaperTrading({ livePrices, onTradeAlert }) {
                   type: 'rejection',
                   title: `🛑 Stop-Loss Hit (${pnlPct.toFixed(2)}%)`,
                   message: `Paper trade on ${trade.ticker} stopped out at $${formatPrice(trade.stopLoss)} (${pnlDollar.toFixed(2)}).`
+                });
+              }
+
+              if (userId && trade.dbId) {
+                updateUserTradeStatus(userId, trade.dbId, {
+                  status: 'LOST',
+                  exitPrice: trade.stopLoss,
+                  pnl: pnlDollar,
+                  closedAt: new Date().toISOString()
                 });
               }
 
@@ -231,9 +339,28 @@ export function usePaperTrading({ livePrices, onTradeAlert }) {
       };
 
       setTrades((prev) => [newTrade, ...prev]);
+
+      if (userId) {
+        insertUserTrade(userId, {
+          symbol: activeItem.id,
+          direction: tradeSetup.isShort ? 'SHORT' : 'LONG',
+          entryPrice: tradeSetup.entry,
+          stopLoss: tradeSetup.stopLoss,
+          takeProfit: tradeSetup.takeProfit1,
+          status: 'OPEN',
+          notes: `${isAuto ? 'Auto-Trading Bot' : 'Manual'} | Rank ${rank || 'Gann'} (${degree || 0}°) | 1:2 R:R`
+        }).then((saved) => {
+          if (saved?.id) {
+            setTrades((prev) =>
+              prev.map((t) => (t.id === newTrade.id ? { ...t, dbId: saved.id } : t))
+            );
+          }
+        });
+      }
+
       return newTrade;
     },
-    []
+    [userId]
   );
 
   // Auto-Trading Evaluation Engine
@@ -327,35 +454,61 @@ export function usePaperTrading({ livePrices, onTradeAlert }) {
   );
 
   // Close an open trade manually at market
-  const closeTradeManually = useCallback((tradeId, currentPrice) => {
-    setTrades((prev) =>
-      prev.map((trade) => {
-        if (trade.id !== tradeId || trade.status !== 'OPEN') return trade;
+  const closeTradeManually = useCallback(
+    (tradeId, currentPrice) => {
+      setTrades((prev) =>
+        prev.map((trade) => {
+          if (trade.id !== tradeId || trade.status !== 'OPEN') return trade;
 
-        const isLong = trade.direction === 'LONG';
-        const pnlDollar = isLong
-          ? (currentPrice - trade.entryPrice) * trade.positionUnits
-          : (trade.entryPrice - currentPrice) * trade.positionUnits;
-        const pnlPct = isLong
-          ? ((currentPrice - trade.entryPrice) / trade.entryPrice) * 100
-          : ((trade.entryPrice - currentPrice) / trade.entryPrice) * 100;
+          const isLong = trade.direction === 'LONG';
+          const pnlDollar = isLong
+            ? (currentPrice - trade.entryPrice) * trade.positionUnits
+            : (trade.entryPrice - currentPrice) * trade.positionUnits;
+          const pnlPct = isLong
+            ? ((currentPrice - trade.entryPrice) / trade.entryPrice) * 100
+            : ((trade.entryPrice - currentPrice) / trade.entryPrice) * 100;
 
-        return {
-          ...trade,
-          status: pnlDollar >= 0 ? 'WIN' : 'LOSS',
-          closeTime: getISTTimeStr(),
-          exitPrice: currentPrice,
-          exitReason: 'Manual Market Close',
-          pnlDollar: Number(pnlDollar.toFixed(2)),
-          pnlPct: Number(pnlPct.toFixed(2))
-        };
-      })
-    );
-  }, []);
+          if (userId && trade.dbId) {
+            updateUserTradeStatus(userId, trade.dbId, {
+              status: pnlDollar >= 0 ? 'WON' : 'LOST',
+              exitPrice: currentPrice,
+              pnl: pnlDollar,
+              closedAt: new Date().toISOString()
+            });
+          }
 
-  const clearJournalHistory = useCallback(() => {
+          return {
+            ...trade,
+            status: pnlDollar >= 0 ? 'WIN' : 'LOSS',
+            closeTime: getISTTimeStr(),
+            exitPrice: currentPrice,
+            exitReason: 'Manual Market Close',
+            pnlDollar: Number(pnlDollar.toFixed(2)),
+            pnlPct: Number(pnlPct.toFixed(2))
+          };
+        })
+      );
+    },
+    [userId]
+  );
+
+  const deleteTrade = useCallback(
+    async (tradeId) => {
+      const target = trades.find((t) => t.id === tradeId);
+      if (userId && target?.dbId) {
+        await deleteUserTrade(userId, target.dbId);
+      }
+      setTrades((prev) => prev.filter((t) => t.id !== tradeId));
+    },
+    [trades, userId]
+  );
+
+  const clearJournalHistory = useCallback(async () => {
+    if (userId) {
+      await clearAllUserTrades(userId);
+    }
     setTrades([]);
-  }, []);
+  }, [userId]);
 
   // Compute overall performance statistics & monthly profit metrics
   const stats = useMemo(() => {
@@ -409,7 +562,9 @@ export function usePaperTrading({ livePrices, onTradeAlert }) {
     executePaperTrade,
     evaluateAndTriggerAutoTrade,
     closeTradeManually,
+    deleteTrade,
     clearJournalHistory,
+    cloudSynced,
     stats
   };
 }

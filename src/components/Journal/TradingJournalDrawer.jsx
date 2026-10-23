@@ -18,7 +18,9 @@ export default function TradingJournalDrawer({
   isOpen,
   onClose,
   paperTrading,
-  livePrices
+  livePrices,
+  user,
+  isSignedIn = false
 }) {
   const [tab, setTab] = useState('open'); // 'open' | 'history'
   const [historyFilter, setHistoryFilter] = useState('ALL');
@@ -29,7 +31,9 @@ export default function TradingJournalDrawer({
     autoTradingEnabled,
     setAutoTradingEnabled,
     closeTradeManually,
+    deleteTrade,
     clearJournalHistory,
+    cloudSynced = false,
     stats = {}
   } = paperTrading || {};
 
@@ -106,6 +110,21 @@ export default function TradingJournalDrawer({
             >
               <X className="w-5 h-5" />
             </button>
+          </div>
+
+          {/* Supabase Cloud Sync Status Pill */}
+          <div className="flex items-center justify-between p-2 rounded-xl bg-[#ede6d4] border border-[#d8d0bf] text-[10px] font-mono">
+            <div className="flex items-center gap-1.5 truncate">
+              <span className={`w-2 h-2 rounded-full shrink-0 ${isSignedIn ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+              <span className="font-semibold text-stone-800 truncate">
+                {isSignedIn
+                  ? `Supabase DB Synced: ${user?.primaryEmailAddress?.emailAddress || user?.fullName || 'User'}`
+                  : 'Local Storage (Sign in to sync with Supabase)'}
+              </span>
+            </div>
+            <span className={`px-1.5 py-0.2 rounded font-bold uppercase shrink-0 ${isSignedIn ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-amber-100 text-amber-800 border border-amber-300'}`}>
+              {isSignedIn ? 'Cloud' : 'Guest'}
+            </span>
           </div>
 
           {/* Automated Trading Engine Switch Banner */}
@@ -316,12 +335,21 @@ export default function TradingJournalDrawer({
                           <span className="block text-stone-400">Opened: {t.openTime}</span>
                         </div>
 
-                        <button
-                          onClick={() => closeTradeManually(t.id, currentPrice)}
-                          className="px-2.5 py-1 rounded-lg bg-stone-800 text-white text-[11px] font-semibold hover:bg-stone-900 active:scale-95 transition"
-                        >
-                          Close at Market (${formatPrice(currentPrice)})
-                        </button>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            onClick={() => closeTradeManually(t.id, currentPrice)}
+                            className="px-2.5 py-1 rounded-lg bg-stone-800 text-white text-[11px] font-semibold hover:bg-stone-900 active:scale-95 transition"
+                          >
+                            Close at Market (${formatPrice(currentPrice)})
+                          </button>
+                          <button
+                            onClick={() => deleteTrade && deleteTrade(t.id)}
+                            className="p-1 rounded-lg text-stone-400 hover:text-red-600 hover:bg-red-50 transition active:scale-90"
+                            title="Delete this open trade record"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   );
@@ -390,17 +418,27 @@ export default function TradingJournalDrawer({
                         </div>
                       </div>
 
-                      <div className="text-right">
-                        <div
-                          className={`font-bold text-xs ${
-                            t.pnlDollar >= 0 ? 'text-emerald-700' : 'text-red-700'
-                          }`}
+                      <div className="flex items-center gap-2">
+                        <div className="text-right">
+                          <div
+                            className={`font-bold text-xs ${
+                              t.pnlDollar >= 0 ? 'text-emerald-700' : 'text-red-700'
+                            }`}
+                          >
+                            {t.pnlDollar >= 0 ? '+' : ''}${formatPrice(t.pnlDollar)}
+                          </div>
+                          <div className="text-[10px] text-stone-500">
+                            {t.pnlPct >= 0 ? '+' : ''}{t.pnlPct.toFixed(2)}%
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => deleteTrade && deleteTrade(t.id)}
+                          className="p-1 rounded-lg text-stone-300 hover:text-red-600 hover:bg-red-50 transition active:scale-90"
+                          title="Delete trade from Supabase history"
                         >
-                          {t.pnlDollar >= 0 ? '+' : ''}${formatPrice(t.pnlDollar)}
-                        </div>
-                        <div className="text-[10px] text-stone-500">
-                          {t.pnlPct >= 0 ? '+' : ''}{t.pnlPct.toFixed(2)}%
-                        </div>
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     </div>
                   );

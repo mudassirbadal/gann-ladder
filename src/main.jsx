@@ -1,7 +1,12 @@
 import React, { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { ClerkProvider } from '@clerk/clerk-react';
 import './index.css';
 import App from './App.jsx';
+
+const CLERK_PUBLISHABLE_KEY =
+  import.meta.env.VITE_CLERK_PUBLISHABLE_KEY ||
+  'pk_test_Y2hhcm1lZC1lZ3JldC0xMTg2LmNsZXJrLmFjY291bnRzLmRldiQ';
 
 // Register PWA service worker
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
@@ -99,7 +104,9 @@ class ErrorBoundary extends React.Component {
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ErrorBoundary>
-      <App />
+      <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY}>
+        <App />
+      </ClerkProvider>
     </ErrorBoundary>
   </StrictMode>,
 );
