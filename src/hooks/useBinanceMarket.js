@@ -102,8 +102,10 @@ export function useBinanceMarket({ assets, dataMode, xmConfig }) {
 
   useEffect(() => {
     if (dataMode !== 'live' || !isXmActive) {
-      setXmFeedActive(false);
-      return;
+      const timer = setTimeout(() => {
+        setXmFeedActive(false);
+      }, 0);
+      return () => clearTimeout(timer);
     }
 
     let isMounted = true;
@@ -138,7 +140,7 @@ export function useBinanceMarket({ assets, dataMode, xmConfig }) {
       isMounted = false;
       clearInterval(interval);
     };
-  }, [dataMode, xmConfig]);
+  }, [dataMode, isXmActive, xmConfig]);
 
   // 2. REST Kline Fetcher
   const fetchBinanceLiveMarket = useCallback(async () => {

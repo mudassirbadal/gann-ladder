@@ -14,7 +14,7 @@ import {
   deleteUserBotTrades
 } from '../utils/supabaseClient';
 
-const STORAGE_KEY = 'gann_paper_trades';
+const getUserStorageKey = (uid) => (uid ? `gann_paper_trades_${uid}` : 'gann_paper_trades_guest');
 const AUTO_TRADE_KEY = 'gann_auto_trading_enabled';
 const STARTING_BALANCE_KEY = 'gann_starting_balance';
 
@@ -62,26 +62,48 @@ export function usePaperTrading({ livePrices, onTradeAlert, user }) {
 
   const [trades, setTrades] = useState(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
+      const saved = localStorage.getItem(getUserStorageKey(userId));
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
     }
   });
 
+  const tradesRef = useRef(trades);
+  useEffect(() => {
+    tradesRef.current = trades;
+  }, [trades]);
+
   const [cloudSynced, setCloudSynced] = useState(false);
 
-  // Sync trades with Supabase on user sign-in
+  // Sync trades with Supabase on user sign-in and isolate per account
   useEffect(() => {
     if (!userId) {
-      setCloudSynced(false);
-      return;
+      const timer = setTimeout(() => {
+        setCloudSynced(false);
+        try {
+          const guestSaved = localStorage.getItem(getUserStorageKey(null));
+          setTrades(guestSaved ? JSON.parse(guestSaved) : []);
+        } catch {
+          setTrades([]);
+        }
+      }, 0);
+      return () => clearTimeout(timer);
     }
 
     let isMounted = true;
+    const timer = setTimeout(() => {
+      try {
+        const cached = localStorage.getItem(getUserStorageKey(userId));
+        if (cached && isMounted) setTrades(JSON.parse(cached));
+      } catch {
+        // ignore
+      }
+    }, 0);
+
     fetchUserTrades(userId).then((dbTrades) => {
       if (!isMounted) return;
-      if (Array.isArray(dbTrades) && dbTrades.length > 0) {
+      if (Array.isArray(dbTrades)) {
         const mapped = dbTrades.map(mapDbTradeToUi);
         setTrades(mapped);
       }
@@ -90,6 +112,7 @@ export function usePaperTrading({ livePrices, onTradeAlert, user }) {
 
     return () => {
       isMounted = false;
+      clearTimeout(timer);
     };
   }, [userId]);
 
@@ -122,14 +145,14 @@ export function usePaperTrading({ livePrices, onTradeAlert, user }) {
 
   const lastAutoTradeRef = useRef({});
 
-  // Persist state to localStorage
+  // Persist state to user-isolated localStorage
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(trades));
+      localStorage.setItem(getUserStorageKey(userId), JSON.stringify(trades));
     } catch {
       // ignore storage error
     }
-  }, [trades]);
+  }, [trades, userId]);
 
   useEffect(() => {
     try {
@@ -321,7 +344,7 @@ export function usePaperTrading({ livePrices, onTradeAlert, user }) {
     }, 0);
 
     return () => clearTimeout(timer);
-  }, [livePrices, onTradeAlert]);
+  }, [livePrices, onTradeAlert, userId]);
 
   // Execute a paper trade (manual or automated)
   const executePaperTrade = useCallback(
@@ -342,8 +365,8 @@ export function usePaperTrading({ livePrices, onTradeAlert, user }) {
         positionUnits: tradeSetup.positionUnits,
         riskDollars: tradeSetup.riskDollars || tradeSetup.maxRiskDollar || 15,
         notionalUsd: tradeSetup.notionalUsd,
-        marginRequired: tradeSetup.marginRequired || Number((tradeSetup.notionalUsd / DEFAULT_LEVERAGE).toFixed(2)),
-        leverage: DEFAULT_LEVERAGE,
+        marginRequired: tradeSetup.marginRequired || Number((tradeSetup.notionalUsd / (tradeSetup.leverage || leverage || DEFAULT_LEVERAGE)).toFixed(2)),
+        leverage: tradeSetup.leverage || leverage || DEFAULT_LEVERAGE,
         rrRatio: tradeSetup.rrRatio || 2.0,
         slDistancePct: tradeSetup.slDistancePct,
         tp1DistancePct: tradeSetup.tp1DistancePct,
@@ -378,7 +401,7 @@ export function usePaperTrading({ livePrices, onTradeAlert, user }) {
 
       return newTrade;
     },
-    [userId]
+    [userId, leverage]
   );
 
   // Auto-Trading Evaluation Engine
@@ -396,7 +419,7 @@ export function usePaperTrading({ livePrices, onTradeAlert, user }) {
       const b1 = activeItem.ladder.b1;
 
       // Check duplicate open trade for this asset
-      const hasOpen = trades.some((t) => t.symbol === sym && t.status === 'OPEN');
+      const hasOpen = tradesRef.current.some((t) => t.symbol === sym && t.status === 'OPEN');
       if (hasOpen) return;
 
       // Cooldown check: 10 minutes between automated triggers per symbol
@@ -468,7 +491,7 @@ export function usePaperTrading({ livePrices, onTradeAlert, user }) {
         }
       }
     },
-    [autoTradingEnabled, trades, startingBalance, leverage, executePaperTrade, onTradeAlert]
+    [autoTradingEnabled, startingBalance, leverage, executePaperTrade, onTradeAlert]
   );
 
   // Close an open trade manually at market
@@ -544,7 +567,7 @@ export function usePaperTrading({ livePrices, onTradeAlert, user }) {
     setTrades([]);
     setStartingBalance(DEFAULT_STARTING_BALANCE);
     try {
-      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(getUserStorageKey(userId));
       localStorage.removeItem(STARTING_BALANCE_KEY);
     } catch {
       // ignore
@@ -587,8 +610,9 @@ export function usePaperTrading({ livePrices, onTradeAlert, user }) {
         ? closed.reduce((acc, t) => acc + (t.rrRatio || 2.0), 0) / closedCount
         : 2.0;
 
-    const currentEquity = Number((startingBalance + totalRealizedPnl).toFixed(2));
-    const returnPct = Number(((totalRealizedPnl / startingBalance) * 100).toFixed(2));
+    const safeBalance = Math.max(1, Number(startingBalance) || DEFAULT_STARTING_BALANCE);
+    const currentEquity = Number((safeBalance + totalRealizedPnl).toFixed(2));
+    const returnPct = Number(((totalRealizedPnl / safeBalance) * 100).toFixed(2));
 
     // Normalized $100 starting baseline requested by user
     const normalized100Current = Number((100 + (100 * (returnPct / 100))).toFixed(2));

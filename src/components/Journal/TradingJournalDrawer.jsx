@@ -8,7 +8,6 @@ import {
   PlayCircle,
   Filter,
   Bot,
-  Zap,
   DollarSign,
   Sliders
 } from 'lucide-react';
@@ -37,10 +36,8 @@ export default function TradingJournalDrawer({
     setLeverage,
     closeTradeManually,
     deleteTrade,
-    clearJournalHistory,
     deleteBotTradesOnly,
     deleteAllTradingData,
-    cloudSynced = false,
     stats = {}
   } = paperTrading || {};
 
@@ -106,7 +103,7 @@ export default function TradingJournalDrawer({
                   Paper Trading Journal
                 </h3>
                 <span className="text-[10px] text-stone-500 font-mono">
-                  Starting Balance: ${stats.startingBalance || 300} · 1:1000 Leverage · 1:2 R:R
+                  Starting Balance: ${stats.startingBalance ?? 300} · 1:{leverage || 1000} Leverage · 1:2 R:R
                 </span>
               </div>
             </div>

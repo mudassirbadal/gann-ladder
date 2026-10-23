@@ -11,11 +11,9 @@ import {
   Radio,
   Zap,
   RotateCcw,
-  Compass,
   ChevronRight,
   Cpu,
   LogIn,
-  Database,
   Activity
 } from 'lucide-react';
 import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react';
@@ -30,7 +28,6 @@ export default function MobileMenuDrawer({
   setSoundEnabled,
   paperTrading,
   user,
-  isSignedIn = false,
   onOpenAnalytics,
   onOpenJournal,
   onOpenRules,
@@ -39,8 +36,7 @@ export default function MobileMenuDrawer({
   onOpenPwa,
   alertsCount = 0,
   onSimulateReaction,
-  onResetPresets,
-  astroState
+  onResetPresets
 }) {
   const [isRendered, setIsRendered] = useState(isOpen);
   const [isActive, setIsActive] = useState(false);
@@ -49,19 +45,20 @@ export default function MobileMenuDrawer({
   useEffect(() => {
     if (isOpen) {
       if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
-      setIsRendered(true);
-      const raf = requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          setIsActive(true);
-        });
-      });
-      return () => cancelAnimationFrame(raf);
+      const timer = setTimeout(() => {
+        setIsRendered(true);
+        setIsActive(true);
+      }, 10);
+      return () => clearTimeout(timer);
     } else {
-      setIsActive(false);
+      const timer = setTimeout(() => {
+        setIsActive(false);
+      }, 0);
       closeTimerRef.current = setTimeout(() => {
         setIsRendered(false);
       }, 300);
       return () => {
+        clearTimeout(timer);
         if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
       };
     }

@@ -11,7 +11,6 @@ import {
 } from 'lucide-react';
 import { formatPrice } from '../../utils/formatters';
 import { generatePresetCandles } from '../../utils/gannMath';
-import CustomDropdown from '../Common/CustomDropdown';
 
 const TIMEFRAMES = [
   { id: '1m', label: '1m' },
@@ -20,51 +19,6 @@ const TIMEFRAMES = [
   { id: '15m', label: '15m' },
   { id: '1h', label: '1h' },
   { id: '4h', label: '4h' }
-];
-
-const TIMEFRAME_OPTIONS = [
-  {
-    value: '1m',
-    label: '1m Candle',
-    sublabel: 'Ultra-fast momentum & scalp reactions',
-    badge: 'Micro',
-    badgeColor: 'bg-stone-200 text-stone-800'
-  },
-  {
-    value: '3m',
-    label: '3m Candle',
-    sublabel: 'Intraday execution & entry trigger',
-    badge: 'Fast',
-    badgeColor: 'bg-blue-100 text-blue-800'
-  },
-  {
-    value: '5m',
-    label: '5m Candle',
-    sublabel: 'Short-term price action & retests',
-    badge: 'Scalp',
-    badgeColor: 'bg-cyan-100 text-cyan-800'
-  },
-  {
-    value: '15m',
-    label: '15m Candle',
-    sublabel: 'Core Gann confluence (RSI + Wick analysis)',
-    badge: 'Core',
-    badgeColor: 'bg-emerald-100 text-emerald-800'
-  },
-  {
-    value: '1h',
-    label: '1h Candle',
-    sublabel: 'Intermediate structural pivot confirmations',
-    badge: 'Swing',
-    badgeColor: 'bg-amber-100 text-amber-800'
-  },
-  {
-    value: '4h',
-    label: '4h Candle',
-    sublabel: 'Primary Gann Anchor & Cardinal Cycle',
-    badge: 'Macro',
-    badgeColor: 'bg-purple-100 text-purple-800'
-  }
 ];
 
 export default function GannCandlestickChart({

@@ -8,9 +8,7 @@ import {
   AlertTriangle,
   ChevronRight,
   ShieldAlert,
-  Sparkles,
   Bot,
-  RefreshCcw,
   CheckCircle2
 } from 'lucide-react';
 import { formatPrice } from '../../utils/formatters';
@@ -27,10 +25,8 @@ export default function BotAnalyticsDashboard({
 
   const {
     stats = {},
-    trades = [],
     deleteBotTradesOnly,
-    deleteAllTradingData,
-    cloudSynced = false
+    deleteAllTradingData
   } = paperTrading || {};
 
   const totalTrades = stats.totalTrades || 0;
@@ -258,7 +254,7 @@ export default function BotAnalyticsDashboard({
           </div>
 
           <span className="font-semibold text-stone-700">
-            Current Equity: ${stats.currentEquity || stats.startingBalance || 300}
+            Current Equity: ${stats.currentEquity !== undefined ? stats.currentEquity : (stats.startingBalance ?? 300)}
           </span>
         </div>
       </div>

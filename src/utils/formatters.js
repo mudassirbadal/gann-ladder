@@ -3,7 +3,7 @@
  */
 export function formatPrice(num, decimals = 2) {
   if (num === undefined || num === null || isNaN(num)) return '0.00';
-  const d = num < 10 ? 4 : decimals;
+  const d = (num !== 0 && Math.abs(num) < 10) ? 4 : decimals;
   return num.toLocaleString('en-US', {
     minimumFractionDigits: d,
     maximumFractionDigits: d

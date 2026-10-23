@@ -31,10 +31,8 @@ export default function BotAnalyticsDrawer({
 
   const {
     stats = {},
-    trades = [],
     deleteBotTradesOnly,
-    deleteAllTradingData,
-    cloudSynced = false
+    deleteAllTradingData
   } = paperTrading || {};
 
   const totalTrades = stats.totalTrades || 0;
@@ -269,7 +267,7 @@ export default function BotAnalyticsDrawer({
               </div>
 
               <span className="font-semibold text-stone-800">
-                Equity: ${formatPrice(stats.currentEquity || stats.startingBalance || 300)}
+                Equity: ${formatPrice(stats.currentEquity !== undefined ? stats.currentEquity : (stats.startingBalance ?? 300))}
               </span>
             </div>
           </div>

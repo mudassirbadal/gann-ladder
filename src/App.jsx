@@ -17,7 +17,6 @@ import AssetSelector from './components/AssetSelector';
 import ToastAlert from './components/ToastAlert';
 import MobileBottomNav from './components/MobileBottomNav';
 import GannModal from './components/Modal/GannModal';
-import TradingPlaybook from './components/TradingRules/TradingPlaybook';
 import ProximityRadar from './components/Radar/ProximityRadar';
 import AstroDirectiveHeader from './components/Astro/AstroDirectiveHeader';
 import AlertsDrawer from './components/Drawers/AlertsDrawer';
@@ -34,7 +33,7 @@ import { useUser } from '@clerk/clerk-react';
 import { syncUserProfile } from './utils/supabaseClient';
 
 export default function App() {
-  const { user, isLoaded: isUserLoaded, isSignedIn } = useUser();
+  const { user, isSignedIn } = useUser();
   const [dataMode, setDataMode] = useState('reference');
   const [assets, setAssets] = useState(INITIAL_ASSETS);
   const [selectedSymbol, setSelectedSymbol] = useState('BTCUSDT');
@@ -477,18 +476,20 @@ export default function App() {
 
   // Paper Trading Automated Execution Engine
   // Evaluates zone proximity/touch & confirmation wicks across assets
+  const { autoTradingEnabled, evaluateAndTriggerAutoTrade } = paperTrading;
+
   useEffect(() => {
-    if (!paperTrading.autoTradingEnabled) return;
+    if (!autoTradingEnabled) return;
 
     Object.values(computedLadders).forEach((item) => {
       if (!item || !item.priceNow || !item.ladder) return;
       const signal = getConfluenceSignal(item);
-      paperTrading.evaluateAndTriggerAutoTrade({
+      evaluateAndTriggerAutoTrade({
         activeItem: item,
         confluenceSignal: signal
       });
     });
-  }, [computedLadders, paperTrading.autoTradingEnabled, getConfluenceSignal, paperTrading.evaluateAndTriggerAutoTrade]);
+  }, [computedLadders, autoTradingEnabled, getConfluenceSignal, evaluateAndTriggerAutoTrade]);
 
   return (
     <div

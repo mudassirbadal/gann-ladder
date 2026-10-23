@@ -9,7 +9,6 @@ export default function LadderRow({
   lvl,
   priceNow,
   showCycleInRows,
-  ladder,
   ticker,
   isExpanded,
   onToggleExpand,

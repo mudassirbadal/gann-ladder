@@ -7,7 +7,6 @@ import {
   Clock,
   ArrowRight,
   Zap,
-  ShieldAlert,
   Compass
 } from 'lucide-react';
 import { formatHourClock } from '../../utils/astroMath';
@@ -23,15 +22,18 @@ export default function AstroDirectiveHeader({
   astroState,
   astroOverride,
   setAstroOverride,
-  confluenceSignal,
-  activeItem
+  confluenceSignal
 }) {
-  if (!astroState) return null;
-
-  const { activeHora, nextHora, voc, nakshatra, compositeScore } = astroState;
+  const activeHora = astroState?.activeHora;
+  const nextHora = astroState?.nextHora;
+  const voc = astroState?.voc;
+  const nakshatra = astroState?.nakshatra;
+  const compositeScore = astroState?.compositeScore;
 
   // Determine market regime & trade side
   const regimeInfo = useMemo(() => {
+    if (!astroState) return null;
+
     if (voc?.isVoC) {
       return {
         regimeLabel: 'MOON VOID-OF-COURSE VETO',
@@ -85,11 +87,13 @@ export default function AstroDirectiveHeader({
       icon: Compass,
       ruleSummary: 'Neutral planetary bias. Trade strictly between R1 and B1 boundaries with wick confirmation.'
     };
-  }, [voc, compositeScore, activeHora]);
+  }, [astroState, voc, compositeScore, activeHora]);
 
   // Hora Countdown & Turn-Time computation
   const horaMetrics = useMemo(() => {
-    if (!activeHora) return { pctElapsed: 50, minsLeft: 30, turnTimeStr: '--:--', isFlip: false };
+    if (!astroState || !activeHora) {
+      return { pctElapsed: 50, minsLeft: 30, turnTimeStr: '--:--', isFlip: false };
+    }
 
     const totalHoraHours = (activeHora.endHr || 1) - (activeHora.startHr || 0);
     const totalHoraMins = Math.max(30, Math.round(totalHoraHours * 60));
@@ -113,7 +117,9 @@ export default function AstroDirectiveHeader({
       currentTag,
       nextTag
     };
-  }, [activeHora, nextHora]);
+  }, [astroState, activeHora, nextHora]);
+
+  if (!astroState || !regimeInfo) return null;
 
   const RegimeIcon = regimeInfo.icon;
 

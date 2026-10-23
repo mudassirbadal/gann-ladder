@@ -8,7 +8,6 @@ import {
   Wifi,
   BookOpen,
   Briefcase,
-  Menu,
   LogIn,
   Activity
 } from 'lucide-react';
@@ -22,10 +21,7 @@ export default function Header({
   setSoundEnabled,
   alertsCount,
   openTradesCount = 0,
-  autoTradingEnabled = false,
   xmFeedActive = false,
-  user,
-  isSignedIn = false,
   onOpenAnalytics,
   onOpenAlerts,
   onOpenSettings,
